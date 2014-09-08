@@ -97,6 +97,7 @@ var trainNet = function ( code, callback ) {
       ma = ma.slice(-60);
       prev = curr;
       exports.progress[code] += 1;
+      cb();
     }, function () {
       exports.net[code] = exports.training[code];
       callback();
@@ -123,7 +124,6 @@ module.exports = exports = {
       var expect = [ 0, 0, 0 ];
       data = data.slice(0, 60);
 
-      console.log(exports.net[code], exports.training[code]);
       if ( exports.net[code] ) {
         if ( prev.NAV === undefined ) {
           prev.NAV = prev.close;
