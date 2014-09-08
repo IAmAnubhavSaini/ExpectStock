@@ -12,7 +12,7 @@ var iconv = new Iconv('euc-kr', 'utf-8//translit//ignore');
 
 module.exports = {
   init : function ( code ) {
-    var url = 'http://fchart.stock.naver.com/sise.nhn?timeframe=day&count=1000&requestType=0&symbol='
+    var url = 'http://fchart.stock.naver.com/sise.nhn?timeframe=day&count=2000&requestType=0&symbol='
         + code;
     var navurl = 'http://companyinfo.stock.naver.com/v1/ETF/GetNAVData.aspx?type=&cmp_cd='
         + code;

@@ -61,6 +61,10 @@ var trainNet = function ( code, callback ) {
         var ma5 = mean(ma.slice(-5));
         var ma20 = mean(ma.slice(-20));
         var ma60 = mean(ma);
+        
+        if ( prev.NAV === undefined ) {
+          prev.NAV = prev.close;
+        }
 
         var x = new brain.Vol(1, 1, 10);
         x.w[0] = ma5;
