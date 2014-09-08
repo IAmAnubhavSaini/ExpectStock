@@ -27,20 +27,16 @@ var trainNet = function ( code, callback ) {
     type : 'input',
     out_sx : 1,
     out_sy : 1,
-    out_depth : 10
+    out_depth : 9
   });
   layer.push({
     type : 'fc',
-    num_neurons : 9
+    num_neurons : 5,
+    activation: 'relu'
   });
   layer.push({
     type : 'fc',
-    num_neurons : 7,
-    activation : 'sigmoid'
-  });
-  layer.push({
-    type : 'fc',
-    num_neurons : 5
+    num_neurons : 7
   });
   layer.push({
     type : 'regression',
@@ -75,20 +71,20 @@ var trainNet = function ( code, callback ) {
         }
 
         var x = new brain.Vol(1, 1, 10);
-        x.w[0] = ma5 / (prev.start * 2);
-        x.w[1] = ma20 / (prev.start * 2);
-        x.w[2] = ma60 / (prev.start * 2);
-        x.w[4] = prev.close / (prev.start * 2);
-        x.w[5] = prev.high / (prev.start * 2);
-        x.w[6] = prev.low / (prev.start * 2);
-        x.w[7] = prev.NAV / (prev.start * 2);
-        x.w[8] = prev.volume / 10000000;
+        x.w[0] = ma5;
+        x.w[1] = ma20;
+        x.w[2] = ma60;
+        x.w[4] = prev.close;
+        x.w[5] = prev.high;
+        x.w[6] = prev.low;
+        x.w[7] = prev.NAV;
+        x.w[8] = prev.volume / 10000;
         x.w[9] = 1;
 
         var y = [];
-        y.push(curr.close / (curr.start * 2));
-        y.push(curr.high / (curr.start * 2));
-        y.push(curr.low / (curr.start * 2));
+        y.push(curr.close);
+        y.push(curr.high);
+        y.push(curr.low);
 
         trainer.train(x, y);
       }
@@ -130,20 +126,17 @@ module.exports = exports = {
         }
 
         var x = new brain.Vol(1, 1, 10);
-        x.w[0] = meanStock(data.slice(-5)) / (prev.start * 2);
-        x.w[1] = meanStock(data.slice(-20)) / (prev.start * 2);
-        x.w[2] = meanStock(data.slice(-60)) / (prev.start * 2);
-        x.w[4] = prev.close / (prev.start * 2);
-        x.w[5] = prev.high / (prev.start * 2);
-        x.w[6] = prev.low / (prev.start * 2);
-        x.w[7] = prev.NAV / (prev.start * 2);
-        x.w[8] = prev.volume / 10000000;
+        x.w[0] = meanStock(data.slice(-5));
+        x.w[1] = meanStock(data.slice(-20));
+        x.w[2] = meanStock(data.slice(-60));
+        x.w[4] = prev.close;
+        x.w[5] = prev.high;
+        x.w[6] = prev.low;
+        x.w[7] = prev.NAV;
+        x.w[8] = prev.volume / 10000;
         x.w[9] = 1;
 
         expect = exports.net[code].forward(x).w;
-        expect[0] = expect[0] * curr.start * 2;
-        expect[1] = expect[1] * curr.start * 2;
-        expect[2] = expect[2] * curr.start * 2;
       }
 
       callback({
