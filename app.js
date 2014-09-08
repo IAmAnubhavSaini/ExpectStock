@@ -58,10 +58,18 @@ app.get('/stock/:stock', function ( req, res ) {
           return dateformat(date, 'mm. dd.');
         },
         currformat : function ( number ) {
-          return '￦ ' + numeral(number).format('0,0[.]00');
+          if ( number ) {
+            return '￦ ' + numeral(number).format('0,0[.]00');
+          } else {
+            return '-';
+          }
         },
         diffformat : function ( number ) {
-          return (number > 0) ? '▲' + number : '▼' + (-number);
+          if ( number ) {
+            return (number > 0) ? '▲' + number : '▼' + (-number);
+          } else {
+            return '-';
+          }
         }
       });
     });
