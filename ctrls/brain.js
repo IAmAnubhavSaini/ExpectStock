@@ -62,10 +62,6 @@ var trainNet = function ( code, callback ) {
         var ma20 = mean(ma.slice(-20));
         var ma60 = mean(ma);
 
-        if ( prev.NAV === undefined ) {
-          prev.NAV = prev.close;
-        }
-
         var x = new brain.Vol(1, 1, 10);
         x.w[0] = ma5;
         x.w[1] = ma20;
@@ -74,7 +70,7 @@ var trainNet = function ( code, callback ) {
         x.w[4] = prev.high;
         x.w[5] = prev.low;
         x.w[6] = prev.NAV;
-        x.w[7] = prev.volume / 1000;
+        x.w[7] = prev.volume / 10000;
         x.w[8] = curr.start;
         x.w[9] = 1;
 
@@ -130,7 +126,7 @@ module.exports = exports = {
         x.w[4] = prev.high;
         x.w[5] = prev.low;
         x.w[6] = prev.NAV;
-        x.w[7] = prev.volume / 1000;
+        x.w[7] = prev.volume / 10000;
         x.w[8] = curr.start;
         x.w[9] = 1;
 
