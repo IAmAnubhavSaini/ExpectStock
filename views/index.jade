@@ -24,7 +24,7 @@ html
         td= item.code
         td= item.title
         td.text-right
-         | ￦ #{format(item.last.close)} &nbsp;
+         | #{'￦ '+format(item.last.close)} &nbsp;
          span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= (diff>0 ? '▲' + diff : '▼' + (-diff))
         td.text-right= '￦ '+format(item.last.start)
         td.text-right= '￦ '+format(item.last.high)

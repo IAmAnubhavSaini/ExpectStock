@@ -64,6 +64,10 @@ var trainNet = function ( code, callback ) {
         var ma5 = mean(ma.slice(-5));
         var ma20 = mean(ma.slice(-20));
         var ma60 = mean(ma);
+        
+        if (prev.NAV === undefined){
+          prev.NAV = prev.close;
+        }
 
         if ( prev.NAV === undefined ) {
           prev.NAV = prev.close;
