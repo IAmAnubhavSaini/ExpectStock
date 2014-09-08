@@ -12,25 +12,25 @@ html
       tr
        th 종목코드
        th 종목명
-       th 현재가
-       th 시작가
-       th 고가
-       th 저가
-       th 거래량
-       th 순자산가치
+       th.text-right 현재가
+       th.text-right 시작가
+       th.text-right 고가
+       th.text-right 저가
+       th.text-right 거래량
+       th.text-right 순자산가치
       each item in stock
        - var diff = item.last.close - item.prev.close;
        tr(onclick='location.href="/stock/'+item.code+'";',class=(diff>0)?'success':'danger')
         td= item.code
         td= item.title
         td.text-right
-         | #{item.last.close} &nbsp;
-         span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= ' ('+(diff>0 ? '▲' + diff : '▼' + (-diff)) + ')'
-        td.text-right= item.last.start
-        td.text-right= item.last.high
-        td.text-right= item.last.low
-        td.text-right= item.last.volume
-        td.text-right= item.last.NAV
+         | ￦ #{format(item.last.close)} &nbsp;
+         span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= (diff>0 ? '▲' + diff : '▼' + (-diff))
+        td.text-right= '￦ '+format(item.last.start)
+        td.text-right= '￦ '+format(item.last.high)
+        td.text-right= '￦ '+format(item.last.low)
+        td.text-right= format(item.last.volume)
+        td.text-right= '￦ '+format(item.last.NAV)
      form(method='get',action='/add')
       div.input-group
        input.form-control(type='text',name='stock',placeholder='종목코드?')

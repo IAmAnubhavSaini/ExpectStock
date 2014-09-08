@@ -5,14 +5,10 @@ html
  body
   .container
    .row
-    .col-ms-8
-     .panel.panel-info
-      .panel-heading
-       h3 종목 기초 정보
-      .panel-body
-       p
-        span.label.label-success= curr.id
-        span= curr.title
+    .col-md-8
+     h2
+      span.label.label-success.pull-left= code
+      span &nbsp; #{title}
      .panel.panel-warning
       .panel-heading
        h4 종목 과거 정보
@@ -27,27 +23,28 @@ html
          th 저가
          th 순자산가치
         - var prev = {};
-        each item in curr.dailyData
-         tr
-          td= item.at
-          td= item.start
-          td= item.end
-          td= (item.end - prev.end)
-          td= item.high
-          td= item.low
-          td= item.NAV
+        each item in curr
+         tr(class=(item.diff>0)?'success':'danger')
+          td= dateformat(item.at)
+          td.text-right= currformat(item.start)
+          td.text-right= currformat(item.close)
+          td.text-right= diffformat(item.diff)
+          td.text-right= currformat(item.high)
+          td.text-right= currformat(item.low)
+          td.text-right= currformat(item.NAV)
           - prev = item;
-    .col-ms-4
+    .col-md-4
      .panel.panel-success
       .panel-heading
        h4 종목 예측 정보
-        ul.list-group
-         li.list-group-item
-          span.label.label-info 종가
-          span= expect[0]
-         li.list-group-item
-          span.label.label-info 고가
-          span= expect[1]
-         li.list-group-item
-          span.label.label-info 저가
-          span= expect[2]
+      .panel-body
+       ul.list-group
+        li.list-group-item
+         span.label.label-info 종가
+         span &nbsp; #{currformat(expect[0])}
+        li.list-group-item
+         span.label.label-info 고가
+         span &nbsp; #{currformat(expect[1])}
+        li.list-group-item
+         span.label.label-info 저가
+         span &nbsp; #{currformat(expect[2])}
