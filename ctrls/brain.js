@@ -66,10 +66,6 @@ var trainNet = function ( code, callback ) {
           prev.NAV = prev.close;
         }
 
-        if ( prev.NAV === undefined ) {
-          prev.NAV = prev.close;
-        }
-
         var x = new brain.Vol(1, 1, 10);
         x.w[0] = ma5;
         x.w[1] = ma20;
