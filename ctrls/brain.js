@@ -74,7 +74,7 @@ var trainNet = function ( code, callback ) {
         x.w[5] = prev.high;
         x.w[6] = prev.low;
         x.w[7] = prev.NAV;
-        x.w[8] = prev.volume / 10000;
+        x.w[8] = prev.volume / 1000;
         x.w[9] = curr.start;
         x.w[10] = 1;
 
@@ -130,7 +130,7 @@ module.exports = exports = {
         x.w[5] = prev.high;
         x.w[6] = prev.low;
         x.w[7] = prev.NAV;
-        x.w[8] = prev.volume / 10000;
+        x.w[8] = prev.volume / 1000;
         x.w[9] = curr.start;
         x.w[10] = 1;
 
