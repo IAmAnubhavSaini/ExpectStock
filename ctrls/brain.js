@@ -31,11 +31,11 @@ var trainNet = function ( code, callback ) {
   });
   layer.push({
     type : 'fc',
-    num_neurons : 10
+    num_neurons : 9
   });
   layer.push({
     type : 'fc',
-    num_neurons : 8,
+    num_neurons : 7,
     activation : 'sigmoid'
   });
   layer.push({
@@ -64,8 +64,8 @@ var trainNet = function ( code, callback ) {
         var ma5 = mean(ma.slice(-5));
         var ma20 = mean(ma.slice(-20));
         var ma60 = mean(ma);
-        
-        if (prev.NAV === undefined){
+
+        if ( prev.NAV === undefined ) {
           prev.NAV = prev.close;
         }
 
@@ -95,14 +95,18 @@ var trainNet = function ( code, callback ) {
       ma.push(curr.close);
       ma = ma.slice(-60);
       prev = curr;
-    }, callback);
+    }, function () {
+      exports.net[code] = exports.training[code];
+      callback();
+    });
   });
 
-  exports.net[code] = net;
+  exports.training[code] = net;
 };
 
 module.exports = exports = {
   net : {},
+  training : {},
   train : function () {
     stock.getCodes(function ( codes ) {
       async.each(codes, trainNet);
@@ -113,27 +117,31 @@ module.exports = exports = {
       var data = item.dailyData.slice(-61);
       var prev = data[data.length - 1];
       var curr = data[data.length - 2];
+      var expect = [ 0, 0, 0 ];
       data = data.slice(0, 60);
 
-      if ( prev.NAV === undefined ) {
-        prev.NAV = prev.close;
+      console.log(exports.net[code], exports.training[code]);
+      if ( exports.net[code] ) {
+        if ( prev.NAV === undefined ) {
+          prev.NAV = prev.close;
+        }
+
+        var x = new brain.Vol(1, 1, 10);
+        x.w[0] = meanStock(data.slice(-5)) / (prev.start * 2);
+        x.w[1] = meanStock(data.slice(-20)) / (prev.start * 2);
+        x.w[2] = meanStock(data.slice(-60)) / (prev.start * 2);
+        x.w[4] = prev.close / (prev.start * 2);
+        x.w[5] = prev.high / (prev.start * 2);
+        x.w[6] = prev.low / (prev.start * 2);
+        x.w[7] = prev.NAV / (prev.start * 2);
+        x.w[8] = prev.volume / 10000000;
+        x.w[9] = 1;
+
+        expect = exports.net[code].forward(x).w;
+        expect[0] = expect[0] * curr.start * 2;
+        expect[1] = expect[1] * curr.start * 2;
+        expect[2] = expect[2] * curr.start * 2;
       }
-
-      var x = new brain.Vol(1, 1, 10);
-      x.w[0] = meanStock(data.slice(-5)) / (prev.start * 2);
-      x.w[1] = meanStock(data.slice(-20)) / (prev.start * 2);
-      x.w[2] = meanStock(data.slice(-60)) / (prev.start * 2);
-      x.w[4] = prev.close / (prev.start * 2);
-      x.w[5] = prev.high / (prev.start * 2);
-      x.w[6] = prev.low / (prev.start * 2);
-      x.w[7] = prev.NAV / (prev.start * 2);
-      x.w[8] = prev.volume / 10000000;
-      x.w[9] = 1;
-
-      var expect = exports.net[code].forward(x).w;
-      expect[0] = expect[0] * curr.start * 2;
-      expect[1] = expect[1] * curr.start * 2;
-      expect[2] = expect[2] * curr.start * 2;
 
       callback(item.title, data, expect);
     });
