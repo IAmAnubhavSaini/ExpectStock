@@ -40,6 +40,9 @@ html
       .panel-body
        ul.list-group
         li.list-group-item
+         span.label.label-success 훈련 진행률
+         span &nbsp; #{progress}
+        li.list-group-item
          span.label.label-info 종가
          span &nbsp; #{currformat(expect[0])}
         li.list-group-item

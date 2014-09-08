@@ -58,6 +58,7 @@ var trainNet = function ( code, callback ) {
   stock.load(code, function ( err, item ) {
     var ma = [];
     var prev = {};
+    exports.progress[code] = 0;
 
     async.each(item.dailyData, function ( curr, cb ) {
       if ( ma.length > 20 ) {
@@ -95,6 +96,7 @@ var trainNet = function ( code, callback ) {
       ma.push(curr.close);
       ma = ma.slice(-60);
       prev = curr;
+      exports.progress[code] += 1;
     }, function () {
       exports.net[code] = exports.training[code];
       callback();
@@ -107,6 +109,7 @@ var trainNet = function ( code, callback ) {
 module.exports = exports = {
   net : {},
   training : {},
+  progress : {},
   train : function () {
     stock.getCodes(function ( codes ) {
       async.each(codes, trainNet);
@@ -143,7 +146,10 @@ module.exports = exports = {
         expect[2] = expect[2] * curr.start * 2;
       }
 
-      callback(item.title, data, expect);
+      callback({
+        title : item.title,
+        progress : exports.progress[code]
+      }, data, expect);
     });
   }
 };
