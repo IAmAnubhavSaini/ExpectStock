@@ -1,0 +1,53 @@
+html
+ head
+  link(href='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',rel='stylesheet')
+  link(href='./app.css',rel='stylesheet')
+ body
+  .container
+   .row
+    .col-ms-8
+     .panel.panel-info
+      .panel-heading
+       h3 종목 기초 정보
+      .panel-body
+       p
+        span.label.label-success= curr.id
+        span= curr.title
+     .panel.panel-warning
+      .panel-heading
+       h4 종목 과거 정보
+      .panel-body
+       table.table.table-striped.table-hover.table-condense
+        tr
+         th 일자
+         th 시가
+         th 종가
+         th 변동폭
+         th 고가
+         th 저가
+         th 순자산가치
+        - var prev = {};
+        each item in curr.dailyData
+         tr
+          td= item.at
+          td= item.start
+          td= item.end
+          td= (item.end - prev.end)
+          td= item.high
+          td= item.low
+          td= item.NAV
+          - prev = item;
+    .col-ms-4
+     .panel.panel-success
+      .panel-heading
+       h4 종목 예측 정보
+        ul.list-group
+         li.list-group-item
+          span.label.label-info 종가
+          span= expect[0]
+         li.list-group-item
+          span.label.label-info 고가
+          span= expect[1]
+         li.list-group-item
+          span.label.label-info 저가
+          span= expect[2]

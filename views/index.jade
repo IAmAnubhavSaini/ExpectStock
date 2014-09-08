@@ -1,0 +1,35 @@
+html
+ head
+  link(href='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',rel='stylesheet')
+  link(href='./app.css',rel='stylesheet')
+ body
+  .container
+   .panel.panel-default
+    .panel-heading
+     h3 종목별 시세
+    .panel-body
+     table.table.table-striped.table-hover
+      tr
+       th 종목코드
+       th 종목명
+       th 현재가
+       th 시작가
+       th 고가
+       th 저가
+       th 거래량
+       th 순자산가치
+      each item in stock
+       tr(onclick='location.href="/stock/'+item.code+'";')
+        td= item.code
+        td= item.title
+        td= item.last.close + ' ('+(item.last.close - item.prev.close)+')'
+        td= item.last.start
+        td= item.last.high
+        td= item.last.low
+        td= item.last.volume
+        td= item.last.NAV
+     form(method='get',action='/add')
+      div.input-group
+       input.form-control(type='text',name='stock',placeholder='종목코드?')
+       span.input-group-btn
+        button.btn.btn-default(type='submit') 추가
