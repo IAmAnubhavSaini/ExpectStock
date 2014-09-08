@@ -27,7 +27,7 @@ var trainNet = function ( code, callback ) {
     type : 'input',
     out_sx : 1,
     out_sy : 1,
-    out_depth : 9
+    out_depth : 11
   });
   layer.push({
     type : 'fc',
@@ -66,10 +66,6 @@ var trainNet = function ( code, callback ) {
           prev.NAV = prev.close;
         }
 
-        if ( prev.NAV === undefined ) {
-          prev.NAV = prev.close;
-        }
-
         var x = new brain.Vol(1, 1, 10);
         x.w[0] = ma5;
         x.w[1] = ma20;
@@ -79,7 +75,8 @@ var trainNet = function ( code, callback ) {
         x.w[6] = prev.low;
         x.w[7] = prev.NAV;
         x.w[8] = prev.volume / 10000;
-        x.w[9] = 1;
+        x.w[9] = curr.start;
+        x.w[10] = 1;
 
         var y = [];
         y.push(curr.close);
@@ -115,8 +112,8 @@ module.exports = exports = {
   expect : function ( code, callback ) {
     stock.load(code, function ( err, item ) {
       var data = item.dailyData.slice(-61);
-      var prev = data[data.length - 1];
-      var curr = data[data.length - 2];
+      var prev = data[data.length - 2];
+      var curr = data[data.length - 1];
       var expect = [ 0, 0, 0 ];
       data = data.slice(0, 60);
 
@@ -134,7 +131,8 @@ module.exports = exports = {
         x.w[6] = prev.low;
         x.w[7] = prev.NAV;
         x.w[8] = prev.volume / 10000;
-        x.w[9] = 1;
+        x.w[9] = curr.start;
+        x.w[10] = 1;
 
         expect = exports.net[code].forward(x).w;
       }
