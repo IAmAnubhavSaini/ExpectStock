@@ -26,7 +26,7 @@ app.get('/', function ( req, res ) {
   stock.getAll(function ( items ) {
     res.render('index.jade', {
       stock : items,
-      format : function ( curr ) {
+      currformat : function ( curr ) {
         return numeral(curr).format('0,0');
       }
     });

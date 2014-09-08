@@ -24,13 +24,13 @@ html
         td= item.code
         td= item.title
         td.text-right
-         | ￦ #{format(item.last.close)} &nbsp;
+         | #{'￦ '+currformat(item.last.close)} &nbsp;
          span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= (diff>0 ? '▲' + diff : '▼' + (-diff))
-        td.text-right= '￦ '+format(item.last.start)
-        td.text-right= '￦ '+format(item.last.high)
-        td.text-right= '￦ '+format(item.last.low)
-        td.text-right= format(item.last.volume)
-        td.text-right= '￦ '+format(item.last.NAV)
+        td.text-right= '￦ '+currformat(item.last.start)
+        td.text-right= '￦ '+currformat(item.last.high)
+        td.text-right= '￦ '+currformat(item.last.low)
+        td.text-right= currformat(item.last.volume)
+        td.text-right= '￦ '+currformat(item.last.NAV)
      form(method='get',action='/add')
       div.input-group
        input.form-control(type='text',name='stock',placeholder='종목코드?')
