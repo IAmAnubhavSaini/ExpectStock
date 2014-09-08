@@ -26,6 +26,8 @@
     "jade": "^1.6.0",
     "mongoose": "^3.8.15",
     "stylus": "^0.48.1",
-    "xml2js": "^0.4.4"
+    "xml2js": "^0.4.4",
+    "node-schedule": "~0.1.13",
+    "dateformat": "~1.0.8-1.2.3"
   }
 }
