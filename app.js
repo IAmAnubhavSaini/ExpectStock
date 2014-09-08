@@ -39,7 +39,7 @@ app.get('/add', function ( req, res ) {
 });
 
 app.get('/stock/:stock', function ( req, res ) {
-  brain.expect(req.params.stock, function ( title, data, output ) {
+  brain.expect(req.params.stock, function ( base, data, output ) {
     var prev = {
       close : 0
     };
@@ -50,14 +50,15 @@ app.get('/stock/:stock', function ( req, res ) {
     }, function () {
       res.render('item.jade', {
         code : req.params.stock,
-        title : title,
+        title : base.title,
+        progress : numeral(base.progress / data.length).format('0.0%'),
         curr : data.reverse(),
         expect : output,
         dateformat : function ( date ) {
           return dateformat(date, 'mm. dd.');
         },
         currformat : function ( number ) {
-          return '￦ '+numeral(number).format('0,0[.]00');
+          return '￦ ' + numeral(number).format('0,0[.]00');
         },
         diffformat : function ( number ) {
           return (number > 0) ? '▲' + number : '▼' + (-number);
