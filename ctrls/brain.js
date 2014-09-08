@@ -148,7 +148,7 @@ module.exports = exports = {
 
       callback({
         title : item.title,
-        progress : exports.progress[code]
+        progress : (exports.progress[code] / item.dailyData.length)
       }, data, expect);
     });
   }

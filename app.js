@@ -51,7 +51,7 @@ app.get('/stock/:stock', function ( req, res ) {
       res.render('item.jade', {
         code : req.params.stock,
         title : base.title,
-        progress : numeral(base.progress / data.length).format('0.0%'),
+        progress : numeral(base.progress).format('0.0%'),
         curr : data.reverse(),
         expect : output,
         dateformat : function ( date ) {
