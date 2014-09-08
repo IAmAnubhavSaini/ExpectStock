@@ -64,11 +64,15 @@ var trainNet = function ( code, callback ) {
         var ma5 = mean(ma.slice(-5));
         var ma20 = mean(ma.slice(-20));
         var ma60 = mean(ma);
+        
+        if (prev.NAV === undefined){
+          prev.NAV = prev.close;
+        }
 
         var x = new brain.Vol(1, 1, 10);
-        x.w[0] = ma5;
-        x.w[1] = ma20;
-        x.w[2] = ma60;
+        x.w[0] = ma5 / (prev.start * 2);
+        x.w[1] = ma20 / (prev.start * 2);
+        x.w[2] = ma60 / (prev.start * 2);
         x.w[4] = prev.close / (prev.start * 2);
         x.w[5] = prev.high / (prev.start * 2);
         x.w[6] = prev.low / (prev.start * 2);
@@ -107,10 +111,14 @@ module.exports = exports = {
       var curr = data[data.length - 2];
       data = data.slice(0, 60);
 
+      if (prev.NAV === undefined){
+        prev.NAV = prev.close;
+      }
+      
       var x = new brain.Vol(1, 1, 10);
-      x.w[0] = meanStock(data.slice(-5));
-      x.w[1] = meanStock(data.slice(-20));
-      x.w[2] = meanStock(data.slice(-60));
+      x.w[0] = meanStock(data.slice(-5)) / (prev.start * 2);
+      x.w[1] = meanStock(data.slice(-20)) / (prev.start * 2);
+      x.w[2] = meanStock(data.slice(-60)) / (prev.start * 2);
       x.w[4] = prev.close / (prev.start * 2);
       x.w[5] = prev.high / (prev.start * 2);
       x.w[6] = prev.low / (prev.start * 2);
@@ -118,12 +126,13 @@ module.exports = exports = {
       x.w[8] = prev.volume / 10000000;
       x.w[9] = 1;
 
-      var expect = exports.net[code].predict(x);
+      console.log(x);
+      var expect = exports.net[code].forward(x).w;
       expect[0] = expect[0] * curr.start * 2;
       expect[1] = expect[1] * curr.start * 2;
       expect[2] = expect[2] * curr.start * 2;
 
-      callback(data, expect);
+      callback(item.title, data, expect);
     });
   }
 };
