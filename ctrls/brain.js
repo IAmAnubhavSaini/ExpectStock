@@ -59,8 +59,8 @@ var trainNet = function ( code, callback ) {
     async.each(item.dailyData, function ( curr, cb ) {
       if ( ma.length > 20 ) {
         var ma5 = mean(ma.slice(-5));
-        var ma20 = mean(ma.slice(-20));
-        var ma60 = mean(ma);
+        var ma10 = mean(ma.slice(-10));
+        var ma20 = mean(ma);
         
         if ( prev.NAV === undefined ) {
           prev.NAV = prev.close;
@@ -68,8 +68,8 @@ var trainNet = function ( code, callback ) {
 
         var x = new brain.Vol(1, 1, 10);
         x.w[0] = ma5;
-        x.w[1] = ma20;
-        x.w[2] = ma60;
+        x.w[1] = ma10;
+        x.w[2] = ma20;
         x.w[3] = prev.close;
         x.w[4] = prev.high;
         x.w[5] = prev.low;
@@ -87,7 +87,7 @@ var trainNet = function ( code, callback ) {
       }
 
       ma.push(curr.close);
-      ma = ma.slice(-60);
+      ma = ma.slice(-20);
       prev = curr;
       exports.progress[code] += 1;
       cb();
@@ -111,11 +111,11 @@ module.exports = exports = {
   },
   expect : function ( code, callback ) {
     stock.load(code, function ( err, item ) {
-      var data = item.dailyData.slice(-61);
+      var data = item.dailyData.slice(-21);
       var prev = data[data.length - 2];
       var curr = data[data.length - 1];
       var expect = [ 0, 0, 0 ];
-      data = data.slice(0, 60);
+      data = data.slice(0, 20);
 
       if ( exports.net[code] ) {
         if ( prev.NAV === undefined ) {
@@ -124,8 +124,8 @@ module.exports = exports = {
 
         var x = new brain.Vol(1, 1, 10);
         x.w[0] = meanStock(data.slice(-5));
-        x.w[1] = meanStock(data.slice(-20));
-        x.w[2] = meanStock(data.slice(-60));
+        x.w[1] = meanStock(data.slice(-10));
+        x.w[2] = meanStock(data.slice(-20));
         x.w[3] = prev.close;
         x.w[4] = prev.high;
         x.w[5] = prev.low;
