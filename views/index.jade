@@ -25,7 +25,7 @@ html
         td= item.title
         td.text-right
          | #{item.last.close} &nbsp;
-         span.label(class=(diff>0)?'label-success':'label-danger')= ' ('+(diff>0 ? '▲' + item.diff : '▼' + (-item.diff)) + ')'
+         span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= ' ('+(diff>0 ? '▲' + diff : '▼' + (-diff)) + ')'
         td.text-right= item.last.start
         td.text-right= item.last.high
         td.text-right= item.last.low
