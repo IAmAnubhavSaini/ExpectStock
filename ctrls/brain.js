@@ -27,7 +27,7 @@ var trainNet = function ( code, callback ) {
     type : 'input',
     out_sx : 1,
     out_sy : 1,
-    out_depth : 11
+    out_depth : 10
   });
   layer.push({
     type : 'fc',
@@ -70,13 +70,13 @@ var trainNet = function ( code, callback ) {
         x.w[0] = ma5;
         x.w[1] = ma20;
         x.w[2] = ma60;
-        x.w[4] = prev.close;
-        x.w[5] = prev.high;
-        x.w[6] = prev.low;
-        x.w[7] = prev.NAV;
-        x.w[8] = prev.volume / 1000;
-        x.w[9] = curr.start;
-        x.w[10] = 1;
+        x.w[3] = prev.close;
+        x.w[4] = prev.high;
+        x.w[5] = prev.low;
+        x.w[6] = prev.NAV;
+        x.w[7] = prev.volume / 1000;
+        x.w[8] = curr.start;
+        x.w[9] = 1;
 
         var y = [];
         y.push(curr.close);
@@ -126,13 +126,13 @@ module.exports = exports = {
         x.w[0] = meanStock(data.slice(-5));
         x.w[1] = meanStock(data.slice(-20));
         x.w[2] = meanStock(data.slice(-60));
-        x.w[4] = prev.close;
-        x.w[5] = prev.high;
-        x.w[6] = prev.low;
-        x.w[7] = prev.NAV;
-        x.w[8] = prev.volume / 1000;
-        x.w[9] = curr.start;
-        x.w[10] = 1;
+        x.w[3] = prev.close;
+        x.w[4] = prev.high;
+        x.w[5] = prev.low;
+        x.w[6] = prev.NAV;
+        x.w[7] = prev.volume / 1000;
+        x.w[8] = curr.start;
+        x.w[9] = 1;
 
         expect = exports.net[code].forward(x).w;
       }
