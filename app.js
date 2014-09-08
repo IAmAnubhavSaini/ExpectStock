@@ -61,4 +61,5 @@ schedule.scheduleJob(rule, function () {
 
 app.listen(3000, function(){
   console.log('APP LISTEN AT PORT 3000');
+  brain.train();
 });

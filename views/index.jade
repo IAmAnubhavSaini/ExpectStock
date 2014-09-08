@@ -19,15 +19,18 @@ html
        th 거래량
        th 순자산가치
       each item in stock
-       tr(onclick='location.href="/stock/'+item.code+'";')
+       - var diff = item.last.close - item.prev.close;
+       tr(onclick='location.href="/stock/'+item.code+'";',class=(diff>0)?'success':'danger')
         td= item.code
         td= item.title
-        td= item.last.close + ' ('+(item.last.close - item.prev.close)+')'
-        td= item.last.start
-        td= item.last.high
-        td= item.last.low
-        td= item.last.volume
-        td= item.last.NAV
+        td.text-right
+         | #{item.last.close} &nbsp;
+         span.label(class=(diff>0)?'label-success':'label-danger')= ' ('+(diff>0 ? '▲' + item.diff : '▼' + (-item.diff)) + ')'
+        td.text-right= item.last.start
+        td.text-right= item.last.high
+        td.text-right= item.last.low
+        td.text-right= item.last.volume
+        td.text-right= item.last.NAV
      form(method='get',action='/add')
       div.input-group
        input.form-control(type='text',name='stock',placeholder='종목코드?')
