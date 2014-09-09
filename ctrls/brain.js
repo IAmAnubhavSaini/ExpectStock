@@ -27,16 +27,16 @@ var trainNet = function ( code, callback ) {
     type : 'input',
     out_sx : 1,
     out_sy : 1,
-    out_depth : 10
+    out_depth : 30
   });
   layer.push({
     type : 'fc',
-    num_neurons : 5,
-    activation: 'relu'
+    num_neurons : 6,
+    activation : 'relu'
   });
   layer.push({
     type : 'fc',
-    num_neurons : 7
+    num_neurons : 12
   });
   layer.push({
     type : 'regression',
@@ -53,7 +53,7 @@ var trainNet = function ( code, callback ) {
 
   stock.load(code, function ( err, item ) {
     var ma = [];
-    var prev = {};
+    var prev = {}, pprev = {};
     exports.progress[code] = 0;
 
     async.each(item.dailyData, function ( curr, cb ) {
@@ -61,22 +61,26 @@ var trainNet = function ( code, callback ) {
         var ma5 = mean(ma.slice(-5));
         var ma20 = mean(ma.slice(-20));
         var ma60 = mean(ma);
-        
+
         if ( prev.NAV === undefined ) {
           prev.NAV = prev.close;
         }
 
-        var x = new brain.Vol(1, 1, 10);
+        var x = new brain.Vol(1, 1, 30);
         x.w[0] = ma5;
         x.w[1] = ma20;
         x.w[2] = ma60;
-        x.w[3] = prev.close;
-        x.w[4] = prev.high;
-        x.w[5] = prev.low;
-        x.w[6] = prev.NAV;
-        x.w[7] = prev.volume / 10000;
-        x.w[8] = curr.start;
+        x.w[3] = prev.high;
+        x.w[4] = prev.low;
+        x.w[5] = prev.NAV;
+        x.w[6] = (prev.volume - pprev.volume) / pprev.volume;
+        x.w[7] = curr.start;
+        x.w[8] = prev.start;
         x.w[9] = 1;
+
+        for ( var i = 0; i < 20; i++ ) {
+          x.w[10 + i] = ma[ma.length - 1 - i];
+        }
 
         var y = [];
         y.push(curr.close);
@@ -88,6 +92,7 @@ var trainNet = function ( code, callback ) {
 
       ma.push(curr.close);
       ma = ma.slice(-60);
+      pprev = prev;
       prev = curr;
       exports.progress[code] += 1;
       cb();
@@ -112,6 +117,7 @@ module.exports = exports = {
   expect : function ( code, callback ) {
     stock.load(code, function ( err, item ) {
       var data = item.dailyData.slice(-61);
+      var pprev = data[data.length - 3];
       var prev = data[data.length - 2];
       var curr = data[data.length - 1];
       var expect = [ 0, 0, 0 ];
@@ -122,17 +128,21 @@ module.exports = exports = {
           prev.NAV = prev.close;
         }
 
-        var x = new brain.Vol(1, 1, 10);
+        var x = new brain.Vol(1, 1, 30);
         x.w[0] = meanStock(data.slice(-5));
         x.w[1] = meanStock(data.slice(-20));
         x.w[2] = meanStock(data.slice(-60));
-        x.w[3] = prev.close;
-        x.w[4] = prev.high;
-        x.w[5] = prev.low;
-        x.w[6] = prev.NAV;
-        x.w[7] = prev.volume / 10000;
-        x.w[8] = curr.start;
+        x.w[3] = prev.high;
+        x.w[4] = prev.low;
+        x.w[5] = prev.NAV;
+        x.w[6] = (prev.volume - pprev.volume) / pprev.volume;
+        x.w[7] = curr.start;
+        x.w[8] = prev.start;
         x.w[9] = 1;
+
+        for ( var i = 0; i < 20; i++ ) {
+          x.w[10 + i] = data[data.length - 1 - i].close;
+        }
 
         expect = exports.net[code].forward(x).w;
       }
