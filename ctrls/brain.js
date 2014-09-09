@@ -57,9 +57,9 @@ var network = function () {
 
   var trainer = new brain.Trainer(net, {
     method : 'adagrad',
-    l2_decay : 0.002,
-    l1_decay : 0.002,
-    batch_size : 1
+    l2_decay : 0.001,
+    l1_decay : 0.001,
+    batch_size : 10
   });
 
   return {
@@ -73,6 +73,7 @@ var trainNet = function ( code, callback ) {
     var ma = [];
     var prev = {};
     exports.progress[code] = 0;
+    var net = network();
 
     async.each(item.dailyData, function ( curr, cb ) {
       if ( ma.length > 20 ) {
@@ -100,7 +101,7 @@ var trainNet = function ( code, callback ) {
         y.push(curr.high);
         y.push(curr.low);
 
-        exports.training.trainer.train(x, y);
+        net.trainer.train(x, y);
       }
 
       ma.push(curr);
@@ -109,6 +110,7 @@ var trainNet = function ( code, callback ) {
       exports.progress[code] += 1;
       cb();
     }, function () {
+      exports.net[code] = net.net;
       callback();
     });
   });
@@ -120,11 +122,9 @@ module.exports = exports = {
   progress : {},
   train : function () {
     stock.getCodes(function ( codes ) {
-      exports.training = network();
       console.log('TRAIN STARTED');
       async.each(codes, trainNet, function () {
         console.log('TRAIN FINISHED');
-        exports.net = exports.training.net;
       });
     });
   },
@@ -136,7 +136,7 @@ module.exports = exports = {
       var expect = [ 0, 0, 0 ];
       data = data.slice(0, 60);
 
-      if ( exports.net ) {
+      if ( exports.net[code] ) {
         if ( prev.NAV === undefined ) {
           prev.NAV = prev.close;
         }
@@ -156,7 +156,7 @@ module.exports = exports = {
           x.w[9 + i * 5] = data[data.length - 1 - i].NAV;
         }
 
-        expect = exports.net.forward(x).w;
+        expect = exports.net[code].forward(x).w;
       }
 
       callback({
