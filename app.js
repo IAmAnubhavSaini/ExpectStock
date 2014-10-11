@@ -94,7 +94,7 @@ schedule.scheduleJob(rule, function () {
 });
 
 rule = new schedule.RecurrenceRule();
-rule.dayOfWeek = [ new schedule.Range(1, 5) ];
+rule.dayOfWeek = 5;
 rule.hour = 17;
 rule.minute = 30;
 

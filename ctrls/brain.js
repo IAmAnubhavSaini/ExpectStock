@@ -162,27 +162,42 @@ module.exports = exports = {
                   + ' x ' + nIn);
               var layers = hLayerSizes(nIn, nOut);
               console.log('LAYERS : ' + layers.join('->') + '->' + nOut);
-              var net = new brain.CDBN({
-                'input' : labels.x,
-                'label' : labels.y,
-                'n_ins' : nIn,
-                'n_outs' : nOut,
-                'hidden_layer_sizes' : layers
-              });
-              net.set('log level', 1);
-              console.log('START PRE_TRAINING');
-              net.pretrain({
-                'lr' : 0.8,
-                'k' : 1,
-                'epochs' : 50
-              });
-              console.log('START TRAINING');
-              net.finetune({
-                'lr' : 0.84,
-                'epochs' : 10
-              });
+              if (exports.net === null){
+                exports.net = new brain.CDBN({
+                  'input' : labels.x,
+                  'label' : labels.y,
+                  'n_ins' : nIn,
+                  'n_outs' : nOut,
+                  'hidden_layer_sizes' : layers
+                });
+                exports.net.set('log level', 1);
+                console.log('START PRE_TRAINING');
+                exports.net.pretrain({
+                  'lr' : 0.8,
+                  'k' : 1,
+                  'epochs' : 50
+                });
+                console.log('START TRAINING');
+                exports.net.finetune({
+                  'lr' : 0.84,
+                  'epochs' : 10
+                });
+              }else{
+                exports.net.x = labels.x;
+                exports.net.y = labels.y;
+                console.log('START PRE_TRAINING');
+                exports.net.pretrain({
+                  'lr' : 0.8,
+                  'k' : 1,
+                  'epochs' : 5
+                });
+                console.log('START TRAINING');
+                exports.net.finetune({
+                  'lr' : 0.84,
+                  'epochs' : 5
+                });
+              }
               console.log('END TRAINING');
-              exports.net = net;
             } else {
               console.log('NO TRAIN DATA');
             }
