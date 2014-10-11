@@ -12,32 +12,11 @@ var iconv = new Iconv('euc-kr', 'utf-8//translit//ignore');
 
 module.exports = {
   init : function ( code ) {
-    var url = 'http://fchart.stock.naver.com/sise.nhn?timeframe=day&count=2000&requestType=0&symbol='
-        + code;
-    var navurl = 'http://companyinfo.stock.naver.com/v1/ETF/GetNAVData.aspx?type=&cmp_cd='
+    var url = 'http://fchart.stock.naver.com/sise.nhn?timeframe=day&count=3000&requestType=0&symbol='
         + code;
     
     var handler = function ( text ) {
-      parser.history(text, function ( err, stock ) {
-        if ( !err ) {
-          var data = stock.dailyData;
-          var first = data[0].at;
-          var last = data[data.length - 1].at;
-
-          navurl += '&sDT=' + dateFormat(first, 'yyyy-mm-dd') + '&eDT='
-              + dateFormat(last, 'yyyy-mm-dd');
-
-          http.get(navurl, function ( res ) {
-            var str = '';
-            res.on('data', function ( text ) {
-              str += text;
-            });
-            res.on('end', function(){
-              parser.navHistory(str, stock);
-            });
-          });
-        }
-      });
+      parser.history(text);
     };
 
     http.get(url, function ( res ) {

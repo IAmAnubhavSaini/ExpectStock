@@ -23,7 +23,7 @@ app.use(stylus.middleware({
 app.use('/static', express.static(__dirname + '/public'));
 
 app.get('/', function ( req, res ) {
-  stock.getAll(function ( items ) {
+  stock.getAll(function ( err, items ) {
     res.render('index.jade', {
       stock : items,
       currformat : function ( curr ) {
@@ -51,7 +51,6 @@ app.get('/stock/:stock', function ( req, res ) {
       res.render('item.jade', {
         code : req.params.stock,
         title : base.title,
-        progress : numeral(base.progress).format('0.0%'),
         curr : data.reverse(),
         expect : output,
         dateformat : function ( date ) {
@@ -70,6 +69,15 @@ app.get('/stock/:stock', function ( req, res ) {
           } else {
             return '-';
           }
+        },
+        predictformat : function ( number ){
+          if ( number > 0.65 ) {
+            return '반드시! ('+numeral(number).format('0.0%')+')';
+          } else if (number > 0.35){
+            return '아마도. ('+numeral(number).format('0.0%')+')';
+          } else {
+            return '불가능! ('+numeral(number).format('0.0%')+')';
+          }
         }
       });
     });
@@ -79,7 +87,7 @@ app.get('/stock/:stock', function ( req, res ) {
 var rule = new schedule.RecurrenceRule();
 rule.dayOfWeek = [ new schedule.Range(1, 5) ];
 rule.hour = [ new schedule.Range(8, 16) ];
-rule.minute = 30;
+rule.minute = [ new schedule.Range(0, 59, 3) ];
 
 schedule.scheduleJob(rule, function () {
   crawler.today();

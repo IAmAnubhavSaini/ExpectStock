@@ -20,7 +20,6 @@ var StockScheme = {
     close : Number,
     high : Number,
     low : Number,
-    NAV : Number,
     volume : Number
   } ]
 };
@@ -56,32 +55,25 @@ module.exports = {
     }, callback);
   },
   getCodes : function ( callback ) {
-    Stock.find({}, 'code', function ( err, stocks ) {
-      var set = [];
-
-      async.each(stocks, function ( stock, cb ) {
+    Stock.find({}, function ( err, stocks ) {
+      async.reduce(stocks, [], function ( set, stock, cb ) {
         set.push(stock.code);
-        cb();
-      }, function () {
-        callback(set)
-      });
+        cb(false, set);
+      }, callback);
     });
   },
   getAll : function ( callback ) {
     Stock.find({}, function ( err, stocks ) {
-      var set = [];
-
-      async.each(stocks, function ( stock, cb ) {
+      async.reduce(stocks, [], function ( set, stock, cb ) {
         set.push({
           code : stock.code,
           title : stock.title,
           last : stock.dailyData[stock.dailyData.length - 1],
-          prev : stock.dailyData[stock.dailyData.length - 2]
+          prev : stock.dailyData[stock.dailyData.length - 2],
+          dailyData : stock.dailyData
         });
-        cb();
-      }, function () {
-        callback(set);
-      });
+        cb(false, set);
+      }, callback);
     });
   }
 }

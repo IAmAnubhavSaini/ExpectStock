@@ -39,28 +39,6 @@ module.exports = {
       }
     });
   },
-  navHistory : function ( str, stock ) {
-    var data = JSON.parse(str);
-
-    if ( data.grid_data ) {
-      var navs = {};
-
-      async.each(data.grid_data, function ( item, cb ) {
-        navs[item.TRD_DT] = item.NAV;
-        cb();
-      }, function () {
-        async.each(stock.dailyData, function ( item, cb ) {
-          var date = dateformat(item.at, 'yyyy-mm-dd');
-          if ( navs[date] ) {
-            item.NAV = navs[date];
-          }
-          cb();
-        }, function () {
-          stock.save();
-        });
-      })
-    }
-  },
   today : function ( str, callback ) {
     var data = JSON.parse(str);
 
@@ -74,8 +52,7 @@ module.exports = {
           close : item.nv,
           high : item.hv,
           low : item.lv,
-          NAV : item.nav,
-          volumen : item.aq,
+          volume : item.aq,
           stat : item.ms
         }
         cb();
