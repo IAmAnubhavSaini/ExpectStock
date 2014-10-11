@@ -76,7 +76,7 @@ app.get('/stock/:stock', function ( req, res ) {
           } else if (number > 0.35){
             return '아마도. ('+numeral(number).format('0.0%')+')';
           } else {
-            return '불가능! ('+numeral(number).format('0.0%')+')';
+            return '불가능!';
           }
         }
       });
@@ -94,9 +94,9 @@ schedule.scheduleJob(rule, function () {
 });
 
 rule = new schedule.RecurrenceRule();
-rule.dayOfWeek = 5;
-rule.hour = 17;
-rule.minute = 30;
+rule.dayOfWeek = 6;
+rule.hour = 0;
+rule.minute = 0;
 
 schedule.scheduleJob(rule, function () {
   brain.train();

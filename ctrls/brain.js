@@ -48,11 +48,7 @@ var input = function ( train ) {
       std : std(train, 'volume'),
     }
   };
-  var out = [], prev = {
-    pos : [],
-    neg : [],
-    k : []
-  };
+  var out = [], prev = [];
   var norm = function ( value ) {
     return (value - set.low) / (set.high - set.low);
   };
@@ -70,11 +66,15 @@ var input = function ( train ) {
 
     var change = train[i].close - train[i - 1].close;
     if ( change > 0 ) {
-      prev.pos.push(change);
-      prev.neg.push(0);
+      prev.push({
+        pos : change,
+        neg : 0
+      });
     } else {
-      prev.neg.push(-change);
-      prev.neg.push(0);
+      prev.push({
+        neg : -change,
+        pos : 0
+      });
     }
 
     if ( i > 3 ) {
@@ -82,7 +82,7 @@ var input = function ( train ) {
       var min5 = min(train.slice(i - 4, i + 1), 'low');
       var max5 = max(train.slice(i - 4, i + 1), 'high');
       var k = (train[i].close - min5) / (max5 - min5);
-      prev.k.push(k);
+      prev[prev.length - 1].k = k;
     }
 
     if ( i > 7 ) {
@@ -97,9 +97,7 @@ var input = function ( train ) {
       out.push(k);
       out.push(avg(prev, 'k'));
 
-      prev.pos.shift();
-      prev.neg.shift();
-      prev.k.shift();
+      prev.shift();
     }
   }
 
@@ -161,7 +159,7 @@ module.exports = exports = {
               console.log('TRAIN SET CREATION COMPLETE : ' + labels.x.length
                   + ' x ' + nIn);
               var layers = hLayerSizes(nIn, nOut);
-              console.log('LAYERS : ' + layers.join('->') + '->' + nOut);
+              console.log('LAYERS : ' + layers.join('→') + '→' + nOut);
               if (exports.net === null){
                 exports.net = new brain.CDBN({
                   'input' : labels.x,
@@ -171,33 +169,33 @@ module.exports = exports = {
                   'hidden_layer_sizes' : layers
                 });
                 exports.net.set('log level', 1);
-                console.log('START PRE_TRAINING');
+                console.log(new Date(), 'START PRE_TRAINING (NEW)');
                 exports.net.pretrain({
                   'lr' : 0.8,
                   'k' : 1,
-                  'epochs' : 50
+                  'epochs' : 10
                 });
-                console.log('START TRAINING');
+                console.log(new Date(), 'START TRAINING');
                 exports.net.finetune({
                   'lr' : 0.84,
-                  'epochs' : 10
+                  'epochs' : 7
                 });
               }else{
                 exports.net.x = labels.x;
                 exports.net.y = labels.y;
-                console.log('START PRE_TRAINING');
+                console.log(new Date(), 'START PRE_TRAINING');
                 exports.net.pretrain({
                   'lr' : 0.8,
                   'k' : 1,
-                  'epochs' : 5
+                  'epochs' : 3
                 });
-                console.log('START TRAINING');
+                console.log(new Date(), 'START TRAINING');
                 exports.net.finetune({
                   'lr' : 0.84,
-                  'epochs' : 5
+                  'epochs' : 3
                 });
               }
-              console.log('END TRAINING');
+              console.log(new Date(), 'END TRAINING');
             } else {
               console.log('NO TRAIN DATA');
             }
