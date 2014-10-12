@@ -30,8 +30,21 @@ function loaded( dataset ){
     ]
   };
   
+  var width = document.getElementById('stock-chart').parentElement.offsetWidth;
+  document.getElementById('stock-chart').width = width;
+  document.getElementById('vol-chart').width = width;
+  
+  Chart.defaults.global.scaleFontSize = 9;
+  Chart.defaults.global.tooltipFontSize = 12;
+  Chart.defaults.global.tooltipTitleFontSize = 12;
+  
   var stockctx = document.getElementById('stock-chart').getContext('2d');
-  new Chart(stockctx).Line(stockData, {});
+  new Chart(stockctx).Line(stockData, {
+    scaleShowGridLines : false,
+    pointDot : false
+  });
   var volctx = document.getElementById('vol-chart').getContext('2d');
-  new Chart(volctx).Bar(volData, {});
+  new Chart(volctx).Bar(volData, {
+    scaleShowGridLines : false
+  });
 };

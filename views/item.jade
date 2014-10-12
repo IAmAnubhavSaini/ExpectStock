@@ -36,9 +36,9 @@ html
      .panel.panel-info
       .panel-heading
        h4 종목 차트
-      .panel-body
-       canvas#stock-chart(width='100%',height='400')
-       canvas#vol-chart(width='100%',height='200')
+      #charts.panel-body
+       canvas#stock-chart(height='400')
+       canvas#vol-chart(height='150')
        script(src='/static/chart.js')
        script(src='/chart?id='+code+'&cb=loaded')
      .panel.panel-success
