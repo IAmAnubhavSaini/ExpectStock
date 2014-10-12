@@ -77,7 +77,7 @@ app.get('/chart', function( req, res ) {
         stock : [],
         vol : []
       }, function(dataset, price, next){
-        dataset.labels.push(dateformat(price.at, 'MM-dd'));
+        dataset.labels.push(dateformat(price.at, 'mm-dd'));
         dataset.stock.push(price.close);
         dataset.vol.push(price.volume);
         next(false, dataset);
