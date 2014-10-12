@@ -4,6 +4,7 @@
 
 var http = require('http');
 var parser = require('./naverParser');
+var brain = require('./brain');
 var stock = require('../models/stock');
 var dateFormat = require('dateformat');
 var async = require('async');
@@ -11,36 +12,36 @@ var Iconv = require('iconv').Iconv;
 var iconv = new Iconv('euc-kr', 'utf-8//translit//ignore');
 
 module.exports = {
-  init : function ( code ) {
+  init : function( code ) {
     var url = 'http://fchart.stock.naver.com/sise.nhn?timeframe=day&count=3000&requestType=0&symbol='
         + code;
-    
-    var handler = function ( text ) {
+
+    var handler = function( text ) {
       parser.history(text);
     };
 
-    http.get(url, function ( res ) {
+    http.get(url, function( res ) {
       var str = '';
       res.setEncoding('binary');
-      res.on('data', function ( text ) {
+      res.on('data', function( text ) {
         str += text;
       });
-      res.on('end', function(){
+      res.on('end', function() {
         var searchResultBin = new Buffer(str, 'binary');
         handler(iconv.convert(searchResultBin).toString('utf-8'));
       });
     });
   },
-  today : function () {
+  today : function() {
     stock
-        .getCodes(function ( err, stocks ) {
+        .getCodes(function( err, stocks ) {
           if ( !err ) {
             var url = 'http://polling.finance.naver.com/api/realtime.nhn?query=SERVICE_RECENT_ITEM:'
                 + stocks.join(',');
-            var save = function ( err, output ) {
-              async.each(Object.keys(output), function ( key, cb ) {
+            var save = function( err, output ) {
+              async.each(Object.keys(output), function( key, cb ) {
                 var item = output[key];
-                parser.get(key, function ( err, stock ) {
+                stock.load(key, function( err, stock ) {
                   if ( !err && stock !== null ) {
                     var data = stock.dailyData;
                     if ( data[data.length - 1].stat === 'CLOSE'
@@ -49,21 +50,22 @@ module.exports = {
                     } else if ( item.stat.match(/OPEN/) !== null ) {
                       data[data.length - 1] = item;
                     }
+                    stock.expect = brain.expect(data.slice(-70));
 
                     stock.save();
                   }
                 });
                 cb();
-              }, function () {
+              }, function() {
               });
             };
 
-            http.get(url, function ( res ) {
+            http.get(url, function( res ) {
               var str = '';
-              res.on('data', function ( text ) {
+              res.on('data', function( text ) {
                 str += text;
               });
-              res.on('end', function(){
+              res.on('end', function() {
                 parser.today(str, save);
               });
             });

@@ -36,19 +36,20 @@ html
       .panel-heading
        h4 종목 예측 정보
       .panel-body
-       ul.list-group
-        li.list-group-item
-         span.label.label-info 내일 오를까?
-         span &nbsp; #{predictformat(expect[0])}
-        li.list-group-item
-         span.label.label-info 이번 주에 오를까?
-         span &nbsp; #{predictformat(expect[1])}
-        li.list-group-item
-         span.label.label-info 다음 주에 오를까?
-         span &nbsp; #{predictformat(expect[2])}
-        li.list-group-item
-         span.label.label-warning 더 떨어질 수 있나?
-         span &nbsp; #{predictformat(expect[3])}
-        li.list-group-item
-         span.label.label-warning 더 오를 수 있나?
-         span &nbsp; #{predictformat(expect[4])}
+       if expect
+        ul.list-group
+         li.list-group-item
+          span.label.label-info 내일 오를까?
+          span &nbsp; #{predictformat(expect[0])}
+         li.list-group-item
+          span.label.label-info 5일 내에 오를까?
+          span &nbsp; #{predictformat(expect[1])}
+         li.list-group-item
+          span.label.label-info 10일 내에 오를까?
+          span &nbsp; #{predictformat(expect[2])}
+         li.list-group-item
+          span.label.label-warning 언제 살까?
+          span &nbsp; #{expect[3] < expect[5] ? "5일 후"+predictformat(expect[3]) : "5일 내"+predictformat(expect[5])}
+         li.list-group-item
+          span.label.label-warning 언제 팔까?
+          span &nbsp; #{expect[4] < expect[6] ? "5일 후"+predictformat(expect[4]) : "5일 내"+predictformat(expect[6])}
