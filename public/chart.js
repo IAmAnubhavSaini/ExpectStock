@@ -41,7 +41,6 @@ function loaded( dataset ){
     showTooltips: true,
     tooltipEvents: ["mousemove", "touchstart", "touchmove"],
     pointDot:false,
-    scaleShowGridLines : false,
     scaleFontSize : 9,
     tooltipFontSize : 12,
     tooltipTitleFontSize : 12
@@ -51,7 +50,6 @@ function loaded( dataset ){
     showScale : false,
     scaleShowLabels:false,
     showTooltips: true,
-    scaleShowGridLines : false,
     tooltipEvents: ["mousemove", "touchstart", "touchmove"],
     scaleFontSize : 9,
     tooltipFontSize : 12,
