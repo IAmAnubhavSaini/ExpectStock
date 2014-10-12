@@ -69,7 +69,7 @@ app.get('/add', function( req, res ) {
 });
 
 app.get('/chart', function( req, res ) {
-  stock.load(req.query.stock, function( err, item ) {
+  stock.load(req.query.id, function( err, item ) {
     if (item !== null){
       var data = item.dailyData.slice(-70);
       async.reduce(item, {
@@ -85,7 +85,7 @@ app.get('/chart', function( req, res ) {
         res.send(req.query.callback+'('+JSON.stringify(dataset)+');');
       });
     }else{
-      res.status(404);
+      res.status(404).send("");
     }
   });
 });
@@ -136,7 +136,7 @@ app.get('/stock/:stock', function( req, res ) {
         });
       });
     }else{
-      res.status(404);
+      res.status(404).send("");
     }
   })
 });
