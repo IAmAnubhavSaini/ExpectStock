@@ -39,21 +39,21 @@ html
       .panel-body
        if expect
         ul.list-group
-         li.list-group-item
+         li.list-group-item(style='opacity:'+expect[0])
           span.label.label-info 내일 오를까?
           span &nbsp; #{predictformat(expect[0])}
-         li.list-group-item
+         li.list-group-item(style='opacity:'+expect[1])
           span.label.label-info 5일 내에 오를까?
           span &nbsp; #{predictformat(expect[1])}
-         li.list-group-item
+         li.list-group-item(style='opacity:'+expect[2])
           span.label.label-info 10일 내에 오를까?
           span &nbsp; #{predictformat(expect[2])}
          li.list-group-item
           span.label.label-warning 언제 살까?
-          span &nbsp; #{expect[3] < expect[5] ? "5일 후 "+predictformat(expect[3]) : "5일 내 "+predictformat(expect[5])}
+          span &nbsp; #{expect[3] < expect[5] ? "5일 후, "+predictformat(expect[3]) : "5일 내, "+predictformat(expect[5])}
          li.list-group-item
           span.label.label-warning 언제 팔까?
-          span &nbsp; #{expect[4] < expect[6] ? "5일 후 "+predictformat(expect[4]) : "5일 내 "+predictformat(expect[6])}
+          span &nbsp; #{expect[4] < expect[6] ? "5일 후, "+predictformat(expect[4]) : "5일 내, "+predictformat(expect[6])}
      .panel.panel-info
       .panel-heading
        h4 종목 차트

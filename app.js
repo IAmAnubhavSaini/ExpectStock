@@ -29,19 +29,19 @@ app.get('/', function( req, res ) {
       expect : function( expect ) {
         if ( expect ) {
           var str = [];
-          if ( expect[0] > 0.65 ) {
+          if ( expect[0] > 0.8 ) {
             str.push('내일 상승')
-          } else if ( expect[0] < 0.35 ) {
+          } else if ( expect[0] < 0.2 ) {
             str.push('내일 하락')
           }
-          if ( expect[1] > 0.65 ) {
+          if ( expect[1] > 0.8 ) {
             str.push('5일 상승')
-          } else if ( expect[1] < 0.35 ) {
+          } else if ( expect[1] < 0.2 ) {
             str.push('5일 하락')
           }
-          if ( expect[2] > 0.65 ) {
+          if ( expect[2] > 0.8 ) {
             str.push('10일 상승')
-          } else if ( expect[2] < 0.35 ) {
+          } else if ( expect[2] < 0.2 ) {
             str.push('10일 하락')
           }
           if ( expect[3] > expect[5] ) {
@@ -125,9 +125,9 @@ app.get('/stock/:stock', function( req, res ) {
             }
           },
           predictformat : function( number ) {
-            if ( number > 0.65 ) {
+            if ( number > 0.8 ) {
               return '반드시! (' + numeral(number).format('0.0%') + ')';
-            } else if ( number > 0.35 ) {
+            } else if ( number > 0.2 ) {
               return '아마도. (' + numeral(number).format('0.0%') + ')';
             } else {
               return '불가능!';

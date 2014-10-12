@@ -73,7 +73,8 @@ module.exports = {
           title : stock.title,
           last : stock.dailyData[stock.dailyData.length - 1],
           prev : stock.dailyData[stock.dailyData.length - 2],
-          dailyData : stock.dailyData
+          dailyData : stock.dailyData,
+          expect : stock.expect
         });
         cb(false, set);
       }, callback);
