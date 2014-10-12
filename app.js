@@ -44,14 +44,14 @@ app.get('/', function( req, res ) {
           } else if ( expect[2] < 0.2 ) {
             str.push('10일 하락')
           }
-          if ( expect[3] > expect[5] ) {
+          if ( expect[3] > expect[5] && expect[3] > 0.8 ) {
             str.push('5일 후 매수')
-          } else {
+          } else if ( expect[5] > 0.8 ){
             str.push('5일 내 매수')
           }
-          if ( expect[4] > expect[6] ) {
+          if ( expect[4] > expect[6] && expect[4] > 0.8 ) {
             str.push('5일 후 매도')
-          } else {
+          } else if ( expect[6] > 0.8 ){
             str.push('5일 내 매도')
           }
           return str;

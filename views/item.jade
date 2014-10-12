@@ -50,10 +50,12 @@ html
           span &nbsp; #{predictformat(expect[2])}
          li.list-group-item
           span.label.label-warning 언제 살까?
-          span &nbsp; #{expect[3] < expect[5] ? "5일 후, "+predictformat(expect[3]) : "5일 내, "+predictformat(expect[5])}
+          span.label(style='opacity:'+expect[5]) &nbsp; "5일 내?"
+          span.label(style='opacity:'+expect[3]) &nbsp; "5일 후?"
          li.list-group-item
           span.label.label-warning 언제 팔까?
-          span &nbsp; #{expect[4] < expect[6] ? "5일 후, "+predictformat(expect[4]) : "5일 내, "+predictformat(expect[6])}
+          span.label(style='opacity:'+expect[6]) &nbsp; "5일 내?"
+          span.label(style='opacity:'+expect[4]) &nbsp; "5일 후?"
      .panel.panel-info
       .panel-heading
        h4 종목 차트
