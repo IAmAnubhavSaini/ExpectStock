@@ -33,14 +33,6 @@ html
           td.text-right= currformat(item.low)
           - prev = item;
     .col-md-4
-     .panel.panel-info
-      .panel-heading
-       h4 종목 차트
-      #charts.panel-body
-       canvas#stock-chart(height='300')
-       canvas#vol-chart(height='100')
-       script(src='/static/chart.js')
-       script(src='/chart?id='+code+'&cb=loaded')
      .panel.panel-success
       .panel-heading
        h4 종목 예측 정보
@@ -62,3 +54,13 @@ html
          li.list-group-item
           span.label.label-warning 언제 팔까?
           span &nbsp; #{expect[4] < expect[6] ? "5일 후 "+predictformat(expect[4]) : "5일 내 "+predictformat(expect[6])}
+     .panel.panel-info
+      .panel-heading
+       h4 종목 차트
+      #charts.panel-body
+       h5 주가 추이
+       canvas#stock-chart(height='250')
+       h5 거래량 추이
+       canvas#vol-chart(height='100')
+       script(src='/static/chart.js')
+       script(src='/chart?id='+code+'&cb=loaded')

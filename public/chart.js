@@ -4,7 +4,7 @@ function loaded( dataset ){
     datasets : [
       {
         label : "Closing Price",
-        fillColor : "rgba(0,220,220,0.2)",
+        fillColor : "rgba(0,220,220,0.7)",
         strokeColor : "rgba(0,220,220,1)",
         pointColor : "rgba(0,220,220,1)",
         pointStrokeColor : "#0ff",
@@ -19,7 +19,7 @@ function loaded( dataset ){
     datasets : [
       {
         label : "Closing Price",
-        fillColor : "rgba(220,0,0,0.2)",
+        fillColor : "rgba(220,0,0,0.4)",
         strokeColor : "rgba(220,0,0,1)",
         pointColor : "rgba(220,0,0,1)",
         pointStrokeColor : "#f00",
