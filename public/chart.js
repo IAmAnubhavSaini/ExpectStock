@@ -35,20 +35,24 @@ function loaded( dataset ){
   document.getElementById('vol-chart').width = width;
   
   var stockctx = document.getElementById('stock-chart').getContext('2d');
-  var chart = new Chart(stockctx);
-  chart.Line(stockData, {
+  new Chart(stockctx).Line(stockData, {
     showScale : false,
+    scaleShowLabels:false,
     showTooltips: true,
+    tooltipEvents: ["mousemove", "touchstart", "touchmove"],
     pointDot:false,
     scaleShowGridLines : false,
     scaleFontSize : 9,
     tooltipFontSize : 12,
     tooltipTitleFontSize : 12
   });
-  chart.Bar(volData, {
+  var volctx = document.getElementById('vol-chart').getContext('2d');
+  new Chart(stockctx).Bar(volData, {
     showScale : false,
+    scaleShowLabels:false,
     showTooltips: true,
     scaleShowGridLines : false,
+    tooltipEvents: ["mousemove", "touchstart", "touchmove"],
     scaleFontSize : 9,
     tooltipFontSize : 12,
     tooltipTitleFontSize : 12,
