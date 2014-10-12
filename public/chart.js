@@ -34,19 +34,19 @@ function loaded( dataset ){
   document.getElementById('stock-chart').width = width;
   document.getElementById('vol-chart').width = width;
   
-  Chart.defaults.global = {
-      scaleFontSize : 9,
-      tooltipFontSize : 12,
-      tooltipTitleFontSize : 12
-  };
-  
   var stockctx = document.getElementById('stock-chart').getContext('2d');
   new Chart(stockctx).Line(stockData, {
     scaleShowGridLines : false,
-    pointDot : false
+    pointDot : false,
+    scaleFontSize : 9,
+    tooltipFontSize : 12,
+    tooltipTitleFontSize : 12
   });
   var volctx = document.getElementById('vol-chart').getContext('2d');
   new Chart(volctx).Bar(volData, {
-    scaleShowGridLines : false
+    scaleShowGridLines : false,
+    scaleFontSize : 9,
+    tooltipFontSize : 12,
+    tooltipTitleFontSize : 12
   });
 };
