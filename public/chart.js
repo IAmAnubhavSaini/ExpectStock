@@ -35,25 +35,23 @@ function loaded( dataset ){
   document.getElementById('vol-chart').width = width;
   
   var stockctx = document.getElementById('stock-chart').getContext('2d');
-  new Chart(stockctx).Line(stockData, {
+  new Chart(stockctx).Bar(stockData, {
     showScale : false,
     scaleShowLabels:false,
-    showTooltips: true,
-    tooltipEvents: ["mousemove", "touchstart", "touchmove"],
-    pointDot:false,
     scaleFontSize : 9,
     tooltipFontSize : 12,
-    tooltipTitleFontSize : 12
+    tooltipTitleFontSize : 12,
+    barValueSpacing : 0,
+    barShowStroke :false
   });
   var volctx = document.getElementById('vol-chart').getContext('2d');
   new Chart(volctx).Bar(volData, {
     showScale : false,
     scaleShowLabels:false,
-    showTooltips: true,
-    tooltipEvents: ["mousemove", "touchstart", "touchmove"],
     scaleFontSize : 9,
     tooltipFontSize : 12,
     tooltipTitleFontSize : 12,
-    barValueSpacing : 0
+    barValueSpacing : 0,
+    barShowStroke :false
   });
 };
