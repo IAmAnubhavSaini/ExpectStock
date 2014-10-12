@@ -68,6 +68,24 @@ app.get('/add', function( req, res ) {
   res.redirect('/');
 });
 
+app.get('/chart', function( req, res ) {
+  stock.load(req.params.stock, function( err, item ) {
+    var data = item.dailyData.slice(-70);
+    async.reduce(item, {
+      labels : [],
+      stock : [],
+      vol : []
+    }, function(dataset, price, next){
+      dataset.labels.push(dateformat(price.at, 'MM-dd'));
+      dataset.stock.push(price.close);
+      dataset.vol.push(price.volume);
+      next(false, dataset);
+    }, function(err, dataset){
+      res.send(req.params.callback+'('+JSON.stringify(dataset)+');');
+    });
+  });
+});
+
 app.get('/stock/:stock', function( req, res ) {
   stock.load(req.params.stock, function( err, item ) {
     var prev = {

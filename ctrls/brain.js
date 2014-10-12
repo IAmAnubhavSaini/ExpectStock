@@ -5,6 +5,8 @@ var brain = require('dnn');
 var stock = require('../models/stock');
 var async = require('async');
 
+const DAYS = 48; 
+
 var max = function( array, key ) {
   var max = Number.MIN_VALUE;
   for ( var i = 0; i < array.length; i++ ) {
@@ -50,7 +52,11 @@ var input = function( train ) {
   };
   var out = [], prev = [];
   var norm = function( value ) {
-    return (value - set.low) / (set.high - set.low);
+    if ( set.high === set.low ) {
+      return 0.5;
+    } else {
+      return (value - set.low) / (set.high - set.low);
+    }
   };
   var rect = function( value ) {
     var upper = set.vol.avg + set.vol.std;
@@ -58,6 +64,17 @@ var input = function( train ) {
       return 1;
     } else {
       return value / upper;
+    }
+  };
+  var push = function( value ) {
+    if ( isNaN(value) || value === undefined ) {
+      out.push(0.5);
+    } else if ( value > 1 ) {
+      out.push(1);
+    } else if ( value < 0 ) {
+      out.push(0);
+    } else {
+      out.push(value);
     }
   };
 
@@ -81,23 +98,25 @@ var input = function( train ) {
       // Stochastic
       var min5 = min(train.slice(i - 4, i + 1), 'low');
       var max5 = max(train.slice(i - 4, i + 1), 'high');
-      var k = (train[i].close - min5) / (max5 - min5);
+      var k = (max5 === min5) ? 0.5 : (train[i].close - min5) / (max5 - min5);
       prev[prev.length - 1].k = k;
     }
 
-    if ( i > 7 ) {
-      out.push(norm(train[i].start));
-      out.push(norm(train[i].close));
-      out.push(norm(train[i].low));
-      out.push(norm(train[i].high));
-      out.push(rect(train[i].start));
-      // RSI
-      out.push(avg(prev, 'pos') / (avg(prev, 'pos') + avg(prev, 'neg')));
-      // Stochastic
-      out.push(k);
-      out.push(avg(prev, 'k'));
-
+    if ( prev.length > 5 ) {
       prev.shift();
+    }
+
+    if ( i > 7 ) {
+      push(norm(train[i].start));
+      push(norm(train[i].close));
+      push(norm(train[i].low));
+      push(norm(train[i].high));
+      push(rect(train[i].volume));
+      // RSI
+      push(avg(prev, 'pos') / (avg(prev, 'pos') + avg(prev, 'neg')));
+      // Stochastic
+      push(k);
+      push(avg(prev, 'k'));
     }
   }
 
@@ -119,8 +138,8 @@ var label = function( curr, next ) {
 
 var hLayerSizes = function( xlen, ylen ) {
   var h = [];
-  h.push(Math.floor(xlen / 8));
-  h.push(Math.floor(xlen / 64 + ylen / 2));
+  h.push(Math.floor(Math.sqrt(xlen * ylen)));
+  h.push(Math.floor(Math.pow(xlen * ylen * ylen, 0.3)));
 
   return h;
 };
@@ -137,20 +156,22 @@ module.exports = exports = {
         console.log(stock.code, stock.title);
         if ( stock.dailyData !== undefined ) {
           var set = [];
-          async.times(stock.dailyData.length - 10, function( index, step ) {
-            var last = stock.dailyData[index];
-            set.push(last);
-            if ( set.length == 70 ) {
-              var i = input(set);
-              var o = label(last, stock.dailyData.slice(index + 1, index + 11));
-              labels.x.push(i);
-              labels.y.push(o);
-              set.shift();
-            }
-            step();
-          }, function() {
-            next(false, labels);
-          });
+          async.times(stock.dailyData.length - 10,
+              function( index, step ) {
+                var last = stock.dailyData[index];
+                set.push(last);
+                if ( set.length == DAYS ) {
+                  var i = input(set);
+                  var o = label(last, stock.dailyData.slice(index + 1,
+                      index + 11));
+                  labels.x.push(i);
+                  labels.y.push(o);
+                  set.shift();
+                }
+                step();
+              }, function() {
+                next(false, labels);
+              });
         } else {
           next(false, labels);
         }
@@ -175,12 +196,12 @@ module.exports = exports = {
             exports.net.pretrain({
               'lr' : 0.8,
               'k' : 1,
-              'epochs' : 10
+              'epochs' : 100
             });
             console.log(new Date(), 'START TRAINING');
             exports.net.finetune({
               'lr' : 0.84,
-              'epochs' : 7
+              'epochs' : 50
             });
           } else {
             exports.net.x = labels.x;
@@ -189,14 +210,24 @@ module.exports = exports = {
             exports.net.pretrain({
               'lr' : 0.8,
               'k' : 1,
-              'epochs' : 3
+              'epochs' : 20
             });
             console.log(new Date(), 'START TRAINING');
             exports.net.finetune({
               'lr' : 0.84,
-              'epochs' : 3
+              'epochs' : 10
             });
           }
+          
+          async.each(stocks, function(item, next){
+            stock.load(item.code, function(err, entry){
+              entry.expect = exports.expect(entry.dailyData.slice(-DAYS));
+              entry.save(function(){
+                console.log('EXPECTED', entry.title);
+              });
+              next();
+            });
+          });
           console.log(new Date(), 'END TRAINING');
         } else {
           console.log('NO TRAIN DATA');
@@ -208,12 +239,13 @@ module.exports = exports = {
     var expect = [
         0, 0, 0, 0, 0, 0, 0
     ];
-    if ( data.length === 70 && exports.net ) {
+    if ( data.length === DAYS && exports.net ) {
       expect = exports.net.predict([
         input(data)
       ])[0];
     }
 
     return expect;
-  }
+  },
+  DAYS: DAYS
 };

@@ -28,3 +28,5 @@ rule.minute = 0;
 schedule.scheduleJob(rule, function() {
   brain.train();
 });
+
+brain.train();

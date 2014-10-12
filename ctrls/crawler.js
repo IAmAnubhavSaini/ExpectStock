@@ -50,7 +50,7 @@ module.exports = {
                     } else if ( item.stat.match(/OPEN/) !== null ) {
                       data[data.length - 1] = item;
                     }
-                    stock.expect = brain.expect(data.slice(-70));
+                    stock.expect = brain.expect(data.slice(-brain.DAYS));
 
                     stock.save();
                   }

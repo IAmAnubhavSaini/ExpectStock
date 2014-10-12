@@ -23,7 +23,8 @@ var StockScheme = {
       low : Number,
       volume : Number
     }
-  ]
+  ],
+  expect : []
 };
 
 var Stock = mongoose.model('Stock', new Schema(StockScheme));
