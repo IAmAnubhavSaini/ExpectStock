@@ -31,8 +31,8 @@ function loaded( dataset ){
   };
   
   var width = document.getElementById('stock-chart').parentElement.offsetWidth;
-  document.getElementById('stock-chart').width = width;
-  document.getElementById('vol-chart').width = width;
+  document.getElementById('stock-chart').width = width - 20;
+  document.getElementById('vol-chart').width = width - 20;
   
   var stockctx = document.getElementById('stock-chart').getContext('2d');
   new Chart(stockctx).Line(stockData, {
@@ -46,15 +46,14 @@ function loaded( dataset ){
     tooltipTitleFontSize : 12
   });
   var volctx = document.getElementById('vol-chart').getContext('2d');
-  new Chart(volctx).Bar(volData, {
+  new Chart(volctx).Line(volData, {
     showScale : false,
     scaleShowLabels:false,
     showTooltips: true,
     tooltipEvents: ["mousemove", "touchstart", "touchmove"],
+    pointDot:false,
     scaleFontSize : 9,
     tooltipFontSize : 12,
-    tooltipTitleFontSize : 12,
-    barValueSpacing : 0,
-    barShowStroke:false
+    tooltipTitleFontSize : 12
   });
 };
