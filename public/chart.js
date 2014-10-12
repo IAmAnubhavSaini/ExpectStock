@@ -34,9 +34,11 @@ function loaded( dataset ){
   document.getElementById('stock-chart').width = width;
   document.getElementById('vol-chart').width = width;
   
-  Chart.defaults.global.scaleFontSize = 9;
-  Chart.defaults.global.tooltipFontSize = 12;
-  Chart.defaults.global.tooltipTitleFontSize = 12;
+  Chart.defaults.global = {
+      scaleFontSize : 9,
+      tooltipFontSize : 12,
+      tooltipTitleFontSize : 12
+  };
   
   var stockctx = document.getElementById('stock-chart').getContext('2d');
   new Chart(stockctx).Line(stockData, {
