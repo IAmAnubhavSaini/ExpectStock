@@ -47,7 +47,7 @@ function loaded( dataset ){
     tooltipTitleFontSize : 12
   });
   var volctx = document.getElementById('vol-chart').getContext('2d');
-  new Chart(stockctx).Bar(volData, {
+  new Chart(volctx).Bar(volData, {
     showScale : false,
     scaleShowLabels:false,
     showTooltips: true,
