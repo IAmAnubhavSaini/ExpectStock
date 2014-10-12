@@ -72,7 +72,7 @@ app.get('/chart', function( req, res ) {
   stock.load(req.query.id, function( err, item ) {
     if (item !== null){
       var data = item.dailyData.slice(-70);
-      async.reduce(item, {
+      async.reduce(data, {
         labels : [],
         stock : [],
         vol : []
@@ -82,7 +82,7 @@ app.get('/chart', function( req, res ) {
         dataset.vol.push(price.volume);
         next(false, dataset);
       }, function(err, dataset){
-        res.send(req.query.callback+'('+JSON.stringify(dataset)+');');
+        res.send(req.query.cb+'('+JSON.stringify(dataset)+');');
       });
     }else{
       res.status(404).send("");
