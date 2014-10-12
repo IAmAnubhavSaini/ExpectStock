@@ -30,9 +30,9 @@ html
         td.text-right= '￦ '+currformat(item.last.high)
         td.text-right= '￦ '+currformat(item.last.low)
         td.text-right= currformat(item.last.volume)
-        - var expect = expect(item.expect)
+        - var expct = expect(item.expect)
         td
-         each ex in expect
+         each ex in expct
           span.label.pull-left.label-info= ex
      form(method='get',action='/add')
       div.input-group
