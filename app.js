@@ -69,67 +69,75 @@ app.get('/add', function( req, res ) {
 });
 
 app.get('/chart', function( req, res ) {
-  stock.load(req.params.stock, function( err, item ) {
-    var data = item.dailyData.slice(-70);
-    async.reduce(item, {
-      labels : [],
-      stock : [],
-      vol : []
-    }, function(dataset, price, next){
-      dataset.labels.push(dateformat(price.at, 'MM-dd'));
-      dataset.stock.push(price.close);
-      dataset.vol.push(price.volume);
-      next(false, dataset);
-    }, function(err, dataset){
-      res.send(req.params.callback+'('+JSON.stringify(dataset)+');');
-    });
+  stock.load(req.query.stock, function( err, item ) {
+    if (item !== null){
+      var data = item.dailyData.slice(-70);
+      async.reduce(item, {
+        labels : [],
+        stock : [],
+        vol : []
+      }, function(dataset, price, next){
+        dataset.labels.push(dateformat(price.at, 'MM-dd'));
+        dataset.stock.push(price.close);
+        dataset.vol.push(price.volume);
+        next(false, dataset);
+      }, function(err, dataset){
+        res.send(req.query.callback+'('+JSON.stringify(dataset)+');');
+      });
+    }else{
+      res.status(404);
+    }
   });
 });
 
 app.get('/stock/:stock', function( req, res ) {
   stock.load(req.params.stock, function( err, item ) {
-    var prev = {
-      close : 0
-    };
-    var data = item.dailyData.slice(-70);
-    async.each(data, function( item, cb ) {
-      item.diff = item.close - prev.close;
-      prev = item;
-      cb();
-    }, function() {
-      res.render('item.jade', {
-        code : req.params.stock,
-        title : item.title,
-        curr : data.reverse(),
-        expect : item.expect,
-        dateformat : function( date ) {
-          return dateformat(date, 'mm. dd.');
-        },
-        currformat : function( number ) {
-          if ( number ) {
-            return '￦ ' + numeral(number).format('0,0[.]00');
-          } else {
-            return '-';
+    if (item !== null){
+      var prev = {
+        close : 0
+      };
+      var data = item.dailyData.slice(-70);
+      async.each(data, function( item, cb ) {
+        item.diff = item.close - prev.close;
+        prev = item;
+        cb();
+      }, function() {
+        res.render('item.jade', {
+          code : req.params.stock,
+          title : item.title,
+          curr : data.reverse(),
+          expect : item.expect,
+          dateformat : function( date ) {
+            return dateformat(date, 'mm. dd.');
+          },
+          currformat : function( number ) {
+            if ( number ) {
+              return '￦ ' + numeral(number).format('0,0[.]00');
+            } else {
+              return '-';
+            }
+          },
+          diffformat : function( number ) {
+            if ( number ) {
+              return (number > 0) ? '▲' + number : '▼' + (-number);
+            } else {
+              return '-';
+            }
+          },
+          predictformat : function( number ) {
+            if ( number > 0.65 ) {
+              return '반드시! (' + numeral(number).format('0.0%') + ')';
+            } else if ( number > 0.35 ) {
+              return '아마도. (' + numeral(number).format('0.0%') + ')';
+            } else {
+              return '불가능!';
+            }
           }
-        },
-        diffformat : function( number ) {
-          if ( number ) {
-            return (number > 0) ? '▲' + number : '▼' + (-number);
-          } else {
-            return '-';
-          }
-        },
-        predictformat : function( number ) {
-          if ( number > 0.65 ) {
-            return '반드시! (' + numeral(number).format('0.0%') + ')';
-          } else if ( number > 0.35 ) {
-            return '아마도. (' + numeral(number).format('0.0%') + ')';
-          } else {
-            return '불가능!';
-          }
-        }
+        });
       });
-    });
+    }else{
+      res.status(404);
+    }
   })
 });
 
