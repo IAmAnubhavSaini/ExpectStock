@@ -134,11 +134,13 @@ var label = function( curr, next ) {
       (curr.high < max(next10, 'high')) ? 1 : 0,
       (curr.low > min(next5, 'low')) ? 1 : 0,
       (curr.high > max(next5, 'high')) ? 1 : 0,
-      (curr.close * 1.05 < min(next, 'close') && curr.close * 1.1 > min(next,
+      (curr.close * 1.02 < max(next, 'close') && curr.close * 1.04 > max(next,
           'close')) ? 1 : 0,
-      (curr.close * 1.1 < min(next, 'close')) ? 1 : 0,
-      (curr.close * 0.9 > max(next, 'close')) ? 1 : 0,
-      (curr.close * 0.95 > max(next, 'close') && curr.close * 0.9 < max(next,
+      (curr.close * 1.04 < max(next, 'close')) ? 1 : 0,
+      (curr.close * 1.02 > max(next, 'close') && curr.close * 0.98 < min(next,
+          'close')) ? 1 : 0,
+      (curr.close * 0.96 > min(next, 'close')) ? 1 : 0,
+      (curr.close * 0.98 > min(next, 'close') && curr.close * 0.96 < min(next,
           'close')) ? 1 : 0
   ];
 };

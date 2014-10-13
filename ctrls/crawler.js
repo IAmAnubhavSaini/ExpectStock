@@ -6,7 +6,7 @@ var http = require('http');
 var parser = require('./naverParser');
 var brain = require('./brain');
 var stock = require('../models/stock');
-var dateFormat = require('dateformat');
+var dateformat = require('dateformat');
 var async = require('async');
 var Iconv = require('iconv').Iconv;
 var iconv = new Iconv('euc-kr', 'utf-8//translit//ignore');
@@ -41,18 +41,27 @@ module.exports = {
             var save = function( err, output ) {
               async.each(Object.keys(output), function( key, cb ) {
                 var item = output[key];
-                stock.load(key, function( err, price ) {
-                  if ( !err && price !== null ) {
-                    var data = price.dailyData;
-                    if ( data[data.length - 1].stat === 'CLOSE'
-                        && item.stat !== 'CLOSE' ) {
-                      data.push(item);
-                    } else if ( item.stat.match(/OPEN/) !== null ) {
-                      data[data.length - 1] = item;
-                    }
-                    price.expect = brain.expect(data.slice(-brain.DAYS));
+                stock.load(key, function( err, entry ) {
+                  if ( !err && entry !== null ) {
+                    console.log('CRAWLED', key, entry.title);
 
-                    price.save();
+                    var data = entry.dailyData;
+                    if ( dateformat(data[data.length - 1].at, 'yyyymmdd') !== dateformat(item.at, 'yyyymmdd') ) {
+                      data.push(item);
+                    } else {
+                      data[data.length - 1].start = item.start;
+                      data[data.length - 1].close = item.close;
+                      data[data.length - 1].high = item.high;
+                      data[data.length - 1].low = item.low;
+                      data[data.length - 1].volume = item.volume;
+                    }
+                    entry.expect = brain.expect(data.slice(-brain.DAYS));
+
+                    entry.save(function(err){
+                      if(err){
+                        console.log(err);
+                      }
+                    });
                   }
                 });
                 cb();

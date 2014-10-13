@@ -126,11 +126,13 @@ app.get('/stock/:stock', function( req, res ) {
           },
           predictformat : function( number ) {
             if ( number > 0.8 ) {
-              return '반드시! (' + numeral(number).format('0.0%') + ')';
+              return '오른다! (' + numeral(number).format('0.0%') + ')';
+            } else if ( number > 0.5 ) {
+              return '오를걸. (' + numeral(number).format('0.0%') + ')';
             } else if ( number > 0.2 ) {
-              return '아마도. (' + numeral(number).format('0.0%') + ')';
+              return '내릴걸. (' + numeral(number).format('0.0%') + ')';
             } else {
-              return '불가능!';
+              return '내린다!';
             }
           }
         });

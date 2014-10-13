@@ -10,7 +10,7 @@ rule.dayOfWeek = [
   new schedule.Range(1, 5)
 ];
 rule.hour = [
-  new schedule.Range(8, 16)
+  new schedule.Range(8, 17)
 ];
 rule.minute = [
   new schedule.Range(0, 59, 20)
@@ -30,3 +30,4 @@ schedule.scheduleJob(rule, function() {
 });
 
 brain.train();
+crawler.today();
