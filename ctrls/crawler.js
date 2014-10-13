@@ -41,18 +41,18 @@ module.exports = {
             var save = function( err, output ) {
               async.each(Object.keys(output), function( key, cb ) {
                 var item = output[key];
-                stock.load(key, function( err, stock ) {
-                  if ( !err && stock !== null ) {
-                    var data = stock.dailyData;
+                stock.load(key, function( err, price ) {
+                  if ( !err && price !== null ) {
+                    var data = price.dailyData;
                     if ( data[data.length - 1].stat === 'CLOSE'
                         && item.stat !== 'CLOSE' ) {
                       data.push(item);
                     } else if ( item.stat.match(/OPEN/) !== null ) {
                       data[data.length - 1] = item;
                     }
-                    stock.expect = brain.expect(data.slice(-brain.DAYS));
+                    price.expect = brain.expect(data.slice(-brain.DAYS));
 
-                    stock.save();
+                    price.save();
                   }
                 });
                 cb();
