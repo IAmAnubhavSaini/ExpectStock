@@ -103,13 +103,19 @@ app.get('/stock/:stock', function( req, res ) {
         prev = item;
         cb();
       }, function() {
+        var rev = data.reverse();
         res.render('item.jade', {
           code : req.params.stock,
           title : item.title,
-          curr : data.reverse(),
+          curr : rev,
+          price : rev[0].close,
           expect : item.expect,
           dateformat : function( date ) {
-            return dateformat(date, 'mm. dd.');
+            if (date){
+              return date.slice(4,6)+'. '+date.slice(6)+'.';
+            }else{
+              return 'NONE.';
+            }
           },
           currformat : function( number ) {
             if ( number ) {
@@ -126,14 +132,10 @@ app.get('/stock/:stock', function( req, res ) {
             }
           },
           predictformat : function( number ) {
-            if ( number > 0.8 ) {
-              return '오른다! (' + numeral(number).format('0.0%') + ')';
-            } else if ( number > 0.5 ) {
-              return '오를걸. (' + numeral(number).format('0.0%') + ')';
-            } else if ( number > 0.2 ) {
-              return '내릴걸. (' + numeral(number).format('0.0%') + ')';
+            if ( number ) {
+              return numeral(number).format('0.0%');
             } else {
-              return '내린다!';
+              return '정보없음';
             }
           }
         });
