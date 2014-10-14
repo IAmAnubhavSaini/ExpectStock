@@ -126,23 +126,28 @@ var input = function( train ) {
 
 var label = function( curr, next ) {
   var next5 = next.slice(0, 5), next10 = next.slice(5, 10);
-  return [
-      (curr.close * 1.005 < next[0].close) ? 1 : 0,
-      (curr.close * 1.005 < min(next5, 'close')) ? 1 : 0,
-      (curr.close * 1.005 < min(next10, 'close')) ? 1 : 0,
-      (curr.low  * 0.995 > avg(next10, 'low')) ? 1 : 0,
-      (curr.high * 1.005 < avg(next10, 'high')) ? 1 : 0,
-      (curr.low  * 0.995 > avg(next5, 'low')) ? 1 : 0,
-      (curr.high * 1.005 > avg(next5, 'high')) ? 1 : 0,
-      (curr.close * 1.02 < avg(next5, 'close')) ? 1 : 0,
-      (curr.close * 1.01 < avg(next5, 'close') && curr.close * 1.02 > avg(next5,
-          'close')) ? 1 : 0,
-      (curr.close * 1.01 > avg(next5, 'close') && curr.close * 0.99 < avg(next5,
-          'close')) ? 1 : 0,
-      (curr.close * 0.99 > avg(next5, 'close') && curr.close * 0.98 < avg(next5,
-          'close')) ? 1 : 0,
-      (curr.close * 0.98 > avg(next5, 'close')) ? 1 : 0
-  ];
+  var avg5 = avg(next5, 'close'), avg10 = avg(next10, 'close');
+  var high5 = avg(next5, 'high'), high10 = avg(next10, 'high');
+  var low5 = avg(next5, 'low'), low10 = avg(next10, 'low');
+  var result = [];
+  
+  var writer = function(baseline){
+    result.push((curr.close * 1.025 < baseline) ? 1: 0);
+    result.push((curr.close * 1.015 < baseline && curr.close * 1.005 > baseline) ? 1: 0);
+    result.push((curr.close * 1.005 < baseline && curr.close * 0.995 > baseline) ? 1: 0);
+    result.push((curr.close * 0.995 < baseline && curr.close * 0.985 > baseline) ? 1: 0);
+    result.push((curr.close * 0.975 > baseline) ? 1: 0);
+  };
+  
+  writer(next[0].close);
+  writer(avg5);
+  writer(avg10);
+  writer(high5);
+  writer(high10);
+  writer(low5);
+  writer(low10);
+  
+  return result;
 };
 
 var hLayerSizes = function( xlen, ylen ) {

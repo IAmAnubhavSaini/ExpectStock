@@ -17,7 +17,6 @@ html
        th.text-right 고가
        th.text-right 저가
        th.text-right 거래량
-       th 조언
       each item in stock
        - var diff = item.last.close - item.prev.close;
        tr(onclick='location.href="/stock/'+item.code+'";',class=(diff>0)?'success':'danger')
@@ -30,10 +29,6 @@ html
         td.text-right= '￦ '+currformat(item.last.high)
         td.text-right= '￦ '+currformat(item.last.low)
         td.text-right= currformat(item.last.volume)
-        - var expct = expect(item.expect)
-        td
-         each ex in expct
-          span.label.pull-left.label-info(style='opacity:'+ex.p, title=probformat(ex.p))= ex.text
      form(method='get',action='/add')
       div.input-group
        input.form-control(type='text',name='stock',placeholder='종목코드?')
