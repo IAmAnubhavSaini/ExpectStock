@@ -33,7 +33,7 @@ html
         - var expct = expect(item.expect)
         td
          each ex in expct
-          span.label.pull-left.label-info= ex
+          span.label.pull-left.label-info(style='opacity:'+ex.p, title=probformat(ex.p))= ex.text
      form(method='get',action='/add')
       div.input-group
        input.form-control(type='text',name='stock',placeholder='종목코드?')
