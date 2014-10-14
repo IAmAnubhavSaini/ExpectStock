@@ -6,7 +6,6 @@ var http = require('http');
 var parser = require('./naverParser');
 var brain = require('./brain');
 var stock = require('../models/stock');
-var dateformat = require('dateformat');
 var async = require('async');
 var Iconv = require('iconv').Iconv;
 var iconv = new Iconv('euc-kr', 'utf-8//translit//ignore');
@@ -46,7 +45,7 @@ module.exports = {
                     console.log('CRAWLED', key, entry.title);
 
                     var data = entry.dailyData;
-                    if ( dateformat(data[data.length - 1].at, 'yyyymmdd') !== dateformat(item.at, 'yyyymmdd') ) {
+                    if ( data[data.length - 1].at !== item.at ) {
                       data.push(item);
                     } else {
                       data[data.length - 1].start = item.start;

@@ -20,10 +20,8 @@ module.exports = {
 
         async.each(data.item, function ( item, cb ) {
           var text = item.$.data.split("|");
-          var date = new Date(text[0].slice(0, 4), text[0].slice(4, 6) - 1,
-              text[0].slice(6));
           output.dailyData.push({
-            at : date,
+            at : text[0],
             start : Number(text[1]),
             high : Number(text[2]),
             low : Number(text[3]),
@@ -47,7 +45,7 @@ module.exports = {
 
       async.each(data.result.areas[0].datas, function ( item, cb ) {
         output[item.cd] = {
-          at : new Date(),
+          at : dateformat('yyyymmdd'),
           start : item.ov,
           close : item.nv,
           high : item.hv,

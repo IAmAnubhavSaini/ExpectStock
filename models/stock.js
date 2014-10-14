@@ -16,7 +16,7 @@ var StockScheme = {
   },
   dailyData : [
     {
-      at : Date,
+      at : String,
       start : Number,
       close : Number,
       high : Number,

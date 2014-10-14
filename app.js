@@ -29,6 +29,7 @@ app.get('/', function( req, res ) {
       expect : function( expect ) {
         if ( expect ) {
           var str = [];
+          str.push('상승확률'+numeral(expect[0]).format('0%'));
           if ( expect[0] > 0.8 ) {
             str.push('내일 상승')
           } else if ( expect[0] < 0.2 ) {
