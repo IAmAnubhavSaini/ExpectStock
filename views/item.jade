@@ -58,11 +58,11 @@ html
          li.list-group-item
           span.label.label-warning 얼마나?
           | &nbsp;
-          span.label.label-success(style='opacity:'+expect[7], title=predictformat(expect[7])) #{price * 1.04}
-          span.label.label-success(style='opacity:'+expect[8], title=predictformat(expect[8])) #{price * 1.02}
-          span.label.label-success(style='opacity:'+expect[9], title=predictformat(expect[9])) #{price}
-          span.label.label-success(style='opacity:'+expect[10], title=predictformat(expect[10])) #{price * 0.98}
-          span.label.label-success(style='opacity:'+expect[11], title=predictformat(expect[11])) #{price * 0.96}
+          span.label.label-success(style='opacity:'+expect[7], title=predictformat(expect[7])) #{currformat(price * 1.04)}
+          span.label.label-success(style='opacity:'+expect[8], title=predictformat(expect[8])) #{currformat(price * 1.02)}
+          span.label.label-success(style='opacity:'+expect[9], title=predictformat(expect[9])) #{currformat(price)}
+          span.label.label-success(style='opacity:'+expect[10], title=predictformat(expect[10])) #{currformat(price * 0.98)}
+          span.label.label-success(style='opacity:'+expect[11], title=predictformat(expect[11])) #{currformat(price * 0.96)}
      .panel.panel-info
       .panel-heading
        h4 종목 차트
