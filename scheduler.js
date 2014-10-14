@@ -30,4 +30,3 @@ schedule.scheduleJob(rule, function() {
 });
 
 brain.train();
-crawler.today();

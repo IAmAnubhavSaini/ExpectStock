@@ -159,7 +159,7 @@ app.get('/stock/:stock', function( req, res ) {
           },
           currformat : function( number ) {
             if ( number ) {
-              return '￦ ' + numeral(number).format('0,0[.]00');
+              return '￦ ' + numeral(number).format('0,0');
             } else {
               return '-';
             }

@@ -6,7 +6,7 @@ var stock = require('../models/stock');
 var async = require('async');
 
 const
-DAYS = 28;
+DAYS = 60 + 8;
 
 var max = function( array, key ) {
   var max = Number.MIN_VALUE;
@@ -125,22 +125,23 @@ var input = function( train ) {
 };
 
 var label = function( curr, next ) {
-  var next5 = next.slice(1, 6), next10 = next.slice(6, 10);
+  var next5 = next.slice(0, 5), next10 = next.slice(5, 10);
   return [
-      (curr.close < next[0].close) ? 1 : 0,
-      (curr.close < avg(next5, 'close')) ? 1 : 0,
-      (curr.close < avg(next10, 'close')) ? 1 : 0,
-      (curr.low > avg(next10, 'low')) ? 1 : 0,
-      (curr.high < avg(next10, 'high')) ? 1 : 0,
-      (curr.low > avg(next5, 'low')) ? 1 : 0,
-      (curr.high > avg(next5, 'high')) ? 1 : 0,
-      (curr.close * 1.045 < avg(next, 'close')) ? 1 : 0,
-      (curr.close * 1.015 < avg(next, 'close') && curr.close * 1.045 > avg(next,
+      (curr.close * 1.005 < next[0].close) ? 1 : 0,
+      (curr.close * 1.005 < min(next5, 'close')) ? 1 : 0,
+      (curr.close * 1.005 < min(next10, 'close')) ? 1 : 0,
+      (curr.low  * 0.995 > avg(next10, 'low')) ? 1 : 0,
+      (curr.high * 1.005 < avg(next10, 'high')) ? 1 : 0,
+      (curr.low  * 0.995 > avg(next5, 'low')) ? 1 : 0,
+      (curr.high * 1.005 > avg(next5, 'high')) ? 1 : 0,
+      (curr.close * 1.02 < avg(next5, 'close')) ? 1 : 0,
+      (curr.close * 1.01 < avg(next5, 'close') && curr.close * 1.02 > avg(next5,
           'close')) ? 1 : 0,
-      (curr.close * 1.015 > avg(next, 'close') && curr.close * 0.985 < avg(next,
+      (curr.close * 1.01 > avg(next5, 'close') && curr.close * 0.99 < avg(next5,
           'close')) ? 1 : 0,
-      (curr.close * 0.985 > avg(next, 'close') && curr.close * 0.955 < avg(next,
-          'close')) ? 1 : 0, (curr.close * 0.96 > avg(next, 'close')) ? 1 : 0
+      (curr.close * 0.99 > avg(next5, 'close') && curr.close * 0.98 < avg(next5,
+          'close')) ? 1 : 0,
+      (curr.close * 0.98 > avg(next5, 'close')) ? 1 : 0
   ];
 };
 
