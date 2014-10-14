@@ -5,6 +5,7 @@ var express = require('express');
 var stylus = require('stylus');
 var async = require('async');
 var stock = require('./models/stock');
+var crawler = require('./ctrls/crawler');
 
 var numeral = require('numeral');
 var dateformat = require('dateformat');
