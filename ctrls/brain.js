@@ -6,7 +6,7 @@ var stock = require('../models/stock');
 var async = require('async');
 
 const
-DAYS = 60 + 8;
+DAYS = 10 + 8;
 
 var max = function( array, key ) {
   var max = Number.MIN_VALUE;
@@ -42,14 +42,10 @@ var std = function( array, key ) {
   return Math.sqrt(avgsq - avg * avg);
 };
 
-var input = function( train ) {
+var input = function( train, avgVol, stdVol ) {
   var set = {
     high : max(train, 'high'),
-    low : min(train, 'low'),
-    vol : {
-      avg : avg(train, 'volume'),
-      std : std(train, 'volume'),
-    }
+    low : min(train, 'low')
   };
   var out = [], prev = [];
   var norm = function( value ) {
@@ -60,7 +56,7 @@ var input = function( train ) {
     }
   };
   var rect = function( value ) {
-    var upper = set.vol.avg + set.vol.std;
+    var upper = avgVol + 2 * stdVol;
     if ( value > upper ) {
       return 1;
     } else {
@@ -127,58 +123,119 @@ var input = function( train ) {
 var label = function( curr, next ) {
   var next5 = next.slice(0, 5), next10 = next.slice(5, 10);
   var avg5 = avg(next5, 'close'), avg10 = avg(next10, 'close');
-  var high5 = avg(next5, 'high'), high10 = avg(next10, 'high');
-  var low5 = avg(next5, 'low'), low10 = avg(next10, 'low');
+  var high5 = max(next5, 'high'), high10 = max(next10, 'high');
+  var low5 = min(next5, 'low'), low10 = min(next10, 'low');
   var result = [];
   
   var writer = function(baseline){
-    result.push((curr.close * 1.025 < baseline) ? 1: 0);
-    result.push((curr.close * 1.015 < baseline && curr.close * 1.005 > baseline) ? 1: 0);
-    result.push((curr.close * 1.005 < baseline && curr.close * 0.995 > baseline) ? 1: 0);
-    result.push((curr.close * 0.995 < baseline && curr.close * 0.985 > baseline) ? 1: 0);
-    result.push((curr.close * 0.975 > baseline) ? 1: 0);
+    result.push((curr.close * 1.03 < baseline) ? 1: 0);
+    result.push((curr.close * 1.03 > baseline && curr.close * 1.01 < baseline) ? 1: 0);
+    result.push((curr.close * 1.01 > baseline && curr.close * 0.99 < baseline) ? 1: 0);
+    result.push((curr.close * 0.99 > baseline && curr.close * 0.97 < baseline) ? 1: 0);
+    result.push((curr.close * 0.97 > baseline) ? 1: 0);
   };
   
   writer(next[0].close);
   writer(avg5);
-  writer(avg10);
   writer(high5);
-  writer(high10);
   writer(low5);
+  writer(avg10);
+  writer(high10);
   writer(low10);
   
   return result;
 };
 
 var hLayerSizes = function( xlen, ylen ) {
-  var h = [], x = xlen / 2;
-  while ( x > ylen ) {
+  var h = [], x = xlen - 20;
+  while ( x > ylen + 20 ) {
     h.push(Math.floor(x));
-    x = x / 2;
+    x = x - 20;
   }
 
   return h;
 };
 
+var trainAndExpect = function( code, labels ) {
+  var net = exports.net[code];
+  if ( labels.x.length > 0 ) {
+    var nIn = labels.x[0].length;
+    var nOut = labels.y[0].length;
+    console.log('TRAIN SET CREATION COMPLETE : ' + labels.x.length
+        + ' x ' + nIn);
+    var layers = hLayerSizes(nIn, nOut);
+    console.log('LAYERS : ' + layers.join('→') + '→' + nOut);
+    if ( !net ) {
+      net = exports.net[code] = new brain.CDBN({
+        'input' : labels.x,
+        'label' : labels.y,
+        'n_ins' : nIn,
+        'n_outs' : nOut,
+        'hidden_layer_sizes' : layers
+      });
+      net.set('log level', 1);
+      console.log(new Date(), 'START PRE_TRAINING (NEW)');
+      net.pretrain({
+        'lr' : 0.8,
+        'k' : 1,
+        'epochs' : 100
+      });
+      console.log(new Date(), 'START TRAINING');
+      net.finetune({
+        'lr' : 0.84,
+        'epochs' : 50
+      });
+    } else {
+      net.x = labels.x;
+      net.y = labels.y;
+      console.log(new Date(), 'START PRE_TRAINING');
+      net.pretrain({
+        'lr' : 0.8,
+        'k' : 1,
+        'epochs' : 20
+      });
+      console.log(new Date(), 'START TRAINING');
+      net.finetune({
+        'lr' : 0.84,
+        'epochs' : 10
+      });
+    }
+
+    stock.load(code, function( err, entry ) {
+      entry.expect = exports.expect(entry.dailyData.slice(-DAYS));
+      entry.save(function() {
+        console.log('EXPECTED', entry.title);
+      });
+    });
+    console.log(new Date(), 'END TRAINING');
+  } else {
+    console.log('NO TRAIN DATA');
+  }
+};
+
 module.exports = exports = {
-  net : null,
+  net : {},
   train : function() {
     stock.getAll(function( err, stocks ) {
       console.log('TRAIN SET CREATION');
-      async.reduce(stocks, {
-        x : [],
-        y : []
-      }, function( labels, stock, next ) {
-        console.log(stock.code, stock.title);
-        if ( stock.dailyData !== undefined ) {
+      async.eachSeries(stocks, function( item, next ) {
+        console.log(item.code, item.title);
+        var labels = {
+            x: [],
+            y: []
+        };
+        
+        if ( item.dailyData !== undefined ) {
           var set = [];
-          async.times(stock.dailyData.length - 10,
+          var avgVol = avg(item.dailyData, 'volume');
+          var stdVol = std(item.dailyData, 'volume');
+          async.times(item.dailyData.length - 10,
               function( index, step ) {
-                var last = stock.dailyData[index];
+                var last = item.dailyData[index];
                 set.push(last);
                 if ( set.length == DAYS ) {
-                  var i = input(set);
-                  var o = label(last, stock.dailyData.slice(index + 1,
+                  var i = input(set, avgVol, stdVol);
+                  var o = label(last, item.dailyData.slice(index + 1,
                       index + 11));
                   labels.x.push(i);
                   labels.y.push(o);
@@ -186,77 +243,21 @@ module.exports = exports = {
                 }
                 step();
               }, function() {
-                next(false, labels);
+                trainAndExpect(item.code, labels);
+                next();
               });
         } else {
           next(false, labels);
         }
-      }, function( err, labels ) {
-        if ( !err && labels.x.length > 0 ) {
-          var nIn = labels.x[0].length;
-          var nOut = labels.y[0].length;
-          console.log('TRAIN SET CREATION COMPLETE : ' + labels.x.length
-              + ' x ' + nIn);
-          var layers = hLayerSizes(nIn, nOut);
-          console.log('LAYERS : ' + layers.join('→') + '→' + nOut);
-          if ( exports.net === null ) {
-            exports.net = new brain.CDBN({
-              'input' : labels.x,
-              'label' : labels.y,
-              'n_ins' : nIn,
-              'n_outs' : nOut,
-              'hidden_layer_sizes' : layers
-            });
-            exports.net.set('log level', 1);
-            console.log(new Date(), 'START PRE_TRAINING (NEW)');
-            exports.net.pretrain({
-              'lr' : 0.8,
-              'k' : 1,
-              'epochs' : 100
-            });
-            console.log(new Date(), 'START TRAINING');
-            exports.net.finetune({
-              'lr' : 0.84,
-              'epochs' : 50
-            });
-          } else {
-            exports.net.x = labels.x;
-            exports.net.y = labels.y;
-            console.log(new Date(), 'START PRE_TRAINING');
-            exports.net.pretrain({
-              'lr' : 0.8,
-              'k' : 1,
-              'epochs' : 20
-            });
-            console.log(new Date(), 'START TRAINING');
-            exports.net.finetune({
-              'lr' : 0.84,
-              'epochs' : 10
-            });
-          }
-
-          async.each(stocks, function( item, next ) {
-            stock.load(item.code, function( err, entry ) {
-              entry.expect = exports.expect(entry.dailyData.slice(-DAYS));
-              entry.save(function() {
-                console.log('EXPECTED', entry.title);
-              });
-              next();
-            });
-          });
-          console.log(new Date(), 'END TRAINING');
-        } else {
-          console.log('NO TRAIN DATA');
-        }
       });
     });
   },
-  expect : function( data ) {
+  expect : function( code, data ) {
     var expect = [
         0, 0, 0, 0, 0, 0, 0
     ];
-    if ( data.length === DAYS && exports.net ) {
-      expect = exports.net.predict([
+    if ( data.length === DAYS && exports.net[code] ) {
+      expect = exports.net[code].predict([
         input(data)
       ])[0];
     }

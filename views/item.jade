@@ -41,53 +41,53 @@ html
         ul.list-group
          li.list-group-item
           span.label.label-info 내일?
-          - var slice = 1.02;
+          - var slice = 1.04;
           each i in [0, 1, 2, 3, 4]
            | &nbsp; 
            span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
-           - slice = slice - 0.01;
+           - slice = slice - 0.02;
          li.list-group-item
           span.label.label-warning +1주
-          - slice = 1.02;
+          - slice = 1.04;
           each i in [5, 6, 7, 8, 9]
            | &nbsp; 
            span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
-           - slice = slice - 0.01;
+           - slice = slice - 0.02;
           br
           span.label.label-info 고가
-          - slice = 1.02;
+          - slice = 1.04;
           each i in [10, 11, 12, 13, 14]
            | &nbsp; 
            span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
-           - slice = slice - 0.01;
+           - slice = slice - 0.02;
           br
           span.label.label-info 저가
-          - slice = 1.02;
+          - slice = 1.04;
           each i in [15, 16, 17, 18, 19]
            | &nbsp; 
            span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
-           - slice = slice - 0.01;
+           - slice = slice - 0.02;
          li.list-group-item
           span.label.label-warning +2주
-          - slice = 1.02;
+          - slice = 1.04;
           each i in [20, 21, 22, 23, 24]
            | &nbsp; 
            span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
-           - slice = slice - 0.01;
+           - slice = slice - 0.02;
           br
           span.label.label-info 고가
-          - slice = 1.02;
+          - slice = 1.04;
           each i in [25, 26, 27, 28, 29]
            | &nbsp; 
            span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
-           - slice = slice - 0.01;
+           - slice = slice - 0.02;
           br
           span.label.label-info 저가
-          - slice = 1.02;
+          - slice = 1.04;
           each i in [30, 31, 32, 33, 34]
            | &nbsp; 
            span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
-           - slice = slice - 0.01;
+           - slice = slice - 0.02;
      .panel.panel-info
       .panel-heading
        h4 종목 차트
