@@ -6,7 +6,7 @@ var stock = require('../models/stock');
 var async = require('async');
 
 const
-DAYS = 10 + 8;
+DAYS = 10 + 18;
 
 var max = function( array, key ) {
   var max = Number.MIN_VALUE;
@@ -57,10 +57,13 @@ var input = function( train, avgVol, stdVol ) {
   };
   var rect = function( value ) {
     var upper = avgVol + 2 * stdVol;
+    var lower = avgVol - 2 * stdVol;
     if ( value > upper ) {
       return 1;
+    } else if ( value < lower ){
+      return 0;
     } else {
-      return value / upper;
+      return (value - lower) / (upper - lower);
     }
   };
   var push = function( value ) {
@@ -99,11 +102,11 @@ var input = function( train, avgVol, stdVol ) {
       prev[prev.length - 1].k = k;
     }
 
-    if ( prev.length > 5 ) {
+    if ( prev.length > 15 ) {
       prev.shift();
     }
 
-    if ( i > 7 ) {
+    if ( i > 17 ) {
       push(norm(train[i].start));
       push(norm(train[i].close));
       push(norm(train[i].low));
@@ -121,7 +124,7 @@ var input = function( train, avgVol, stdVol ) {
 };
 
 var label = function( curr, next ) {
-  var next5 = next.slice(0, 5), next10 = next.slice(5, 10);
+  var next5 = next.slice(5, 10), next10 = next.slice(10, 20);
   var avg5 = avg(next5, 'close'), avg10 = avg(next10, 'close');
   var high5 = max(next5, 'high'), high10 = max(next10, 'high');
   var low5 = min(next5, 'low'), low10 = min(next10, 'low');
@@ -147,10 +150,10 @@ var label = function( curr, next ) {
 };
 
 var hLayerSizes = function( xlen, ylen ) {
-  var h = [], x = xlen - 20;
-  while ( x > ylen + 20 ) {
+  var h = [], x = xlen - 15;
+  while ( x > ylen ) {
     h.push(Math.floor(x));
-    x = x - 20;
+    x = x - 15;
   }
 
   return h;
@@ -202,7 +205,7 @@ var trainAndExpect = function( code, labels ) {
     }
 
     stock.load(code, function( err, entry ) {
-      entry.expect = exports.expect(entry.dailyData.slice(-DAYS));
+      exports.expect(entry);
       entry.save(function() {
         console.log('EXPECTED', entry.title);
       });
@@ -213,56 +216,66 @@ var trainAndExpect = function( code, labels ) {
   }
 };
 
+var trainEntry = function( item, next ) {
+  console.log(item.code, item.title);
+  var labels = {
+      x: [],
+      y: []
+  };
+  
+  if ( item.dailyData !== undefined ) {
+    var set = [];
+    var avgVol = avg(item.dailyData, 'volume');
+    var stdVol = std(item.dailyData, 'volume');
+    async.times(item.dailyData.length - 20,
+        function( index, step ) {
+          var last = item.dailyData[index];
+          set.push(last);
+          if ( set.length == DAYS ) {
+            var i = input(set, avgVol, stdVol);
+            var o = label(last, item.dailyData.slice(index + 1,
+                index + 21));
+            labels.x.push(i);
+            labels.y.push(o);
+            set.shift();
+          }
+          step();
+        }, function() {
+          trainAndExpect(item.code, labels);
+          next();
+        });
+  } else {
+    next(false, labels);
+  }
+};
+
 module.exports = exports = {
   net : {},
   train : function() {
     stock.getAll(function( err, stocks ) {
       console.log('TRAIN SET CREATION');
-      async.eachSeries(stocks, function( item, next ) {
-        console.log(item.code, item.title);
-        var labels = {
-            x: [],
-            y: []
-        };
-        
-        if ( item.dailyData !== undefined ) {
-          var set = [];
-          var avgVol = avg(item.dailyData, 'volume');
-          var stdVol = std(item.dailyData, 'volume');
-          async.times(item.dailyData.length - 10,
-              function( index, step ) {
-                var last = item.dailyData[index];
-                set.push(last);
-                if ( set.length == DAYS ) {
-                  var i = input(set, avgVol, stdVol);
-                  var o = label(last, item.dailyData.slice(index + 1,
-                      index + 11));
-                  labels.x.push(i);
-                  labels.y.push(o);
-                  set.shift();
-                }
-                step();
-              }, function() {
-                trainAndExpect(item.code, labels);
-                next();
-              });
-        } else {
-          next(false, labels);
-        }
-      });
+      async.eachSeries(stocks, trainEntry);
     });
   },
-  expect : function( code, data ) {
+  expect : function( entry ) {
+    var data = entry.dailyData.slice(-DAYS);
+    var code = entry.code;
     var expect = [
-        0, 0, 0, 0, 0, 0, 0
+        0, 0, 0, 0, 0
     ];
-    if ( data.length === DAYS && exports.net[code] ) {
-      expect = exports.net[code].predict([
-        input(data)
-      ])[0];
+    
+    if ( data.length === DAYS){
+      if ( !exports.net[code] ) {
+        entry.expect = exports.net[code].predict([
+          input(data)
+        ])[0];
+      }else{
+        trainEntry(entry, function(){
+          console.log('TRAINING END', entry.code);
+        });
+      }
     }
 
-    return expect;
-  },
-  DAYS : DAYS
+    return entry;
+  }
 };

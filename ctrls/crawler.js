@@ -54,7 +54,7 @@ module.exports = {
                       data[data.length - 1].low = item.low;
                       data[data.length - 1].volume = item.volume;
                     }
-                    entry.expect = brain.expect(key, data.slice(-brain.DAYS));
+                    brain.expect(entry);
 
                     entry.save(function(err){
                       if(err){
