@@ -20,6 +20,7 @@ app.use(stylus.middleware({
 app.use('/static', express.static(__dirname + '/public'));
 
 app.get('/', function( req, res ) {
+  res.set('Cache-Control', 'no-cache');
   stock.getAll(function( err, items ) {
     res.render('index.jade', {
       stock : items,
@@ -43,6 +44,8 @@ app.get('/add', function( req, res ) {
 });
 
 app.get('/chart', function( req, res ) {
+  res.set('Content-Type', 'text/javascript');
+  res.set('Cache-Control', 'no-cache');
   stock.load(req.query.id, function( err, item ) {
     if ( item !== null ) {
       var data = item.dailyData.slice(-70);
@@ -65,6 +68,7 @@ app.get('/chart', function( req, res ) {
 });
 
 app.get('/stock/:stock', function( req, res ) {
+  res.set('Cache-Control', 'no-cache');
   stock.load(req.params.stock, function( err, item ) {
     if ( item !== null ) {
       var prev = {
