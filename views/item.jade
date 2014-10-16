@@ -39,7 +39,7 @@ html
       .panel-body
        if expect
         p
-         span.label.label-info 내일?
+         span.label.label-info +1일
          | &nbsp; 
          - var slice = 1.04;
          each i in [0, 1, 2, 3, 4]
@@ -69,7 +69,7 @@ html
         p
          span.label.label-warning +4주
          | &nbsp; 
-          - slice = 1.04;
+         - slice = 1.04;
          each i in [20, 21, 22, 23, 24]
           span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
           - slice = slice - 0.02;
@@ -82,7 +82,7 @@ html
           - slice = slice - 0.02;
          br
          span.label.label-info 저가
-          | &nbsp; 
+         | &nbsp; 
          - slice = 1.04;
          each i in [30, 31, 32, 33, 34]
           span.label.label-success(style='opacity:'+expect[i], title=predictformat(expect[i])) #{Math.round(price * slice)}
