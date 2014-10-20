@@ -6,7 +6,7 @@ var stock = require('../models/stock');
 var async = require('async');
 
 const
-DAYS = 10 + 18;
+DAYS = 10 + 15;
 
 var max = function( array, key ) {
   var max = Number.MIN_VALUE;
@@ -42,30 +42,16 @@ var std = function( array, key ) {
   return Math.sqrt(avgsq - avg * avg);
 };
 
-var input = function( train, avgVol, stdVol ) {
-  var set = {
-    high : max(train, 'high'),
-    low : min(train, 'low')
-  };
+var ema = function( array, key ){
+  var sum = array[0][key], rate = 0.8;
+  for ( var i = 1; i < array.length; i++ ) {
+    sum = array[i][key] * rate + (1 - rate) * sum;
+  }
+  return sum;
+};
+
+var input = function( train ) {
   var out = [], prev = [];
-  var norm = function( value ) {
-    if ( set.high === set.low ) {
-      return 0.5;
-    } else {
-      return (value - set.low) / (set.high - set.low);
-    }
-  };
-  var rect = function( value ) {
-    var upper = avgVol + 2 * stdVol;
-    var lower = avgVol - 2 * stdVol;
-    if ( value > upper ) {
-      return 1;
-    } else if ( value < lower ){
-      return 0;
-    } else {
-      return (value - lower) / (upper - lower);
-    }
-  };
   var push = function( value ) {
     if ( isNaN(value) || value === undefined ) {
       out.push(0.5);
@@ -80,43 +66,66 @@ var input = function( train, avgVol, stdVol ) {
 
   for ( var i = 1; i < train.length; i++ ) {
     var item = train[i];
-
-    var change = train[i].close - train[i - 1].close;
+    var yesterday = train[i - 1];
+    
+    var change = train[i].close - yesterday.close;
     if ( change > 0 ) {
-      prev.push({
-        pos : change,
-        neg : 0
-      });
+      item.pos = change;
+      item.neg = 0;
     } else {
-      prev.push({
-        neg : -change,
-        pos : 0
-      });
+      item.neg = -change;
+      item.pos = 0;
     }
+    item.TR = Math.max(item.high - item.low, 
+      Math.abs(item.high - yesterday.close),
+      Math.abs(item.low - yesterday.close));
+    item.upMove = item.high - yesterday.high;
+    item.downMove = yesterday.low - item.low;
+    item.typical = (item.high + item.low + item.close) / 3;
+    item.MFpos = (item.typical > yesterday.typical) ? item.typical * item.volume : 0;
+    item.MFneg = (item.typical < yesterday.typical) ? item.typical * item.volume : 0;
+    prev.push(item);
 
-    if ( i > 3 ) {
-      // Stochastic
-      var min5 = min(train.slice(i - 4, i + 1), 'low');
-      var max5 = max(train.slice(i - 4, i + 1), 'high');
-      var k = (max5 === min5) ? 0.5 : (train[i].close - min5) / (max5 - min5);
-      prev[prev.length - 1].k = k;
-    }
-
-    if ( prev.length > 15 ) {
-      prev.shift();
-    }
-
-    if ( i > 17 ) {
-      push(norm(train[i].start));
-      push(norm(train[i].close));
-      push(norm(train[i].low));
-      push(norm(train[i].high));
-      push(rect(train[i].volume));
+    if ( prev.length === 15 ) {
+      // MA
+      item.ma15 = avg(prev, 'close');
+      item.ma7 = avg(prev.slice(-7), 'close');
+      item.MACD = item.ma15 - item.ma7;
+      item.MACDsign = (item.MACD > 0) ? 1 : 0;
+      item.MACDratio = Math.abs(item.MACD - yesterday.MACD) / yesterday.MACD;
+      push(item.MACDsign);
+      push(item.MACDratio);
+      // Volume
+      item.VOLratio = (avg(prev.slice(-5), 'volume') > avg(prev, 'volume')) ? 1 : 0;
+      
       // RSI
-      push(avg(prev, 'pos') / (avg(prev, 'pos') + avg(prev, 'neg')));
-      // Stochastic
-      push(k);
-      push(avg(prev, 'k'));
+      item.RSI = avg(prev, 'pos') / (avg(prev, 'pos') + avg(prev, 'neg'));
+      push(item.RSI);
+      // Stochastic-K
+      item.stochK = (item.close - min(prev, 'low')) / (max(prev, 'high') - min(prev, 'low'));
+      push(item.stochK);
+      // Stochastic-D
+      item.stochD = avg(prev, 'stochK');
+      push(item.stockD);
+      // CCI[0,1]
+      item.CCI = (item.close - item.ma15) / (std(prev, 'close') * 3) + 0.5;
+      push(item.CCI);
+      // ROC[0,1]
+      item.ROC = (item.close - prev[0].close) / (prev[0].close * 2) + 0.5;
+      push(item.ROC);
+      // DMI/100
+      item.DMpos = (item.upMove > item.downMove && item.upMove > 0) ? item.upMove : 0;
+      item.DMneg = (item.upMove < item.downMove && item.downMove > 0) ? item.downMove : 0;
+      item.DIpos = ema(prev, 'DMpos') / (avg(prev, 'TR') * 100);
+      item.DIneg = ema(prev, 'DMneg') / (avg(prev, 'TR') * 100);
+      push(item.DIpos);
+      push(item.DIneg);
+      // MFI
+      item.MFI = avg(prev, 'MFpos') / (avg(prev, 'MFpos') + avg(prev, 'MFneg'));
+      push(item.MFI);
+      
+      
+      prev.shift();
     }
   }
 
@@ -124,43 +133,35 @@ var input = function( train, avgVol, stdVol ) {
 };
 
 var label = function( curr, next ) {
-  var next5 = next.slice(5, 10), next10 = next.slice(10, 20);
-  var avg5 = avg(next5, 'close'), avg10 = avg(next10, 'close');
-  var high5 = max(next5, 'high'), high10 = max(next10, 'high');
-  var low5 = min(next5, 'low'), low10 = min(next10, 'low');
   var result = [];
   
-  var writer = function(baseline){
-    result.push((curr.close * 1.03 < baseline) ? 1: 0);
-    result.push((curr.close * 1.03 > baseline && curr.close * 1.01 < baseline) ? 1: 0);
-    result.push((curr.close * 1.01 > baseline && curr.close * 0.99 < baseline) ? 1: 0);
-    result.push((curr.close * 0.99 > baseline && curr.close * 0.97 < baseline) ? 1: 0);
-    result.push((curr.close * 0.97 > baseline) ? 1: 0);
+  var writer = function(key){
+    var prev = curr[key];
+    for ( var i = 0; i < next.length; i ++ ){
+      var tomorrow = next[i][key];
+      result.push((tomorrow > prev) ? 1 : 0);
+      prev = tomorrow;
+    }
   };
   
-  writer(next[0].close);
-  writer(avg5);
-  writer(high5);
-  writer(low5);
-  writer(avg10);
-  writer(high10);
-  writer(low10);
+  writer('close');
+  writer('high');
+  writer('low');
   
   return result;
 };
 
 var hLayerSizes = function( xlen, ylen ) {
-  var h = [], x = xlen - 15;
+  var h = [], x = xlen - 20;
   while ( x > ylen ) {
     h.push(Math.floor(x));
-    x = x - 15;
+    x = x - 20;
   }
 
   return h;
 };
 
 var trainAndExpect = function( code, labels ) {
-  var net = exports.net[code];
   if ( labels.x.length > 0 ) {
     var nIn = labels.x[0].length;
     var nOut = labels.y[0].length;
@@ -168,44 +169,44 @@ var trainAndExpect = function( code, labels ) {
         + ' x ' + nIn);
     var layers = hLayerSizes(nIn, nOut);
     console.log('LAYERS : ' + layers.join('→') + '→' + nOut);
-    if ( !net ) {
-      net = exports.net[code] = new brain.CDBN({
+    if ( !exports.net[code] ) {
+      exports.net[code] = new brain.CDBN({
         'input' : labels.x,
         'label' : labels.y,
         'n_ins' : nIn,
         'n_outs' : nOut,
         'hidden_layer_sizes' : layers
       });
-      net.set('log level', 1);
+      exports.net[code].set('log level', 1);
       console.log(new Date(), 'START PRE_TRAINING (NEW)');
-      net.pretrain({
+      exports.net[code].pretrain({
         'lr' : 0.8,
         'k' : 1,
         'epochs' : 100
       });
       console.log(new Date(), 'START TRAINING');
-      net.finetune({
+      exports.net[code].finetune({
         'lr' : 0.84,
         'epochs' : 50
       });
     } else {
-      net.x = labels.x;
-      net.y = labels.y;
+      exports.net[code].x = labels.x;
+      exports.net[code].y = labels.y;
       console.log(new Date(), 'START PRE_TRAINING');
-      net.pretrain({
+      exports.net[code].pretrain({
         'lr' : 0.8,
         'k' : 1,
         'epochs' : 20
       });
       console.log(new Date(), 'START TRAINING');
-      net.finetune({
+      exports.net[code].finetune({
         'lr' : 0.84,
         'epochs' : 10
       });
     }
 
     stock.load(code, function( err, entry ) {
-      exports.expect(entry);
+      entry.expect = exports.expect(entry, true);
       entry.save(function() {
         console.log('EXPECTED', entry.title);
       });
@@ -227,14 +228,14 @@ var trainEntry = function( item, next ) {
     var set = [];
     var avgVol = avg(item.dailyData, 'volume');
     var stdVol = std(item.dailyData, 'volume');
-    async.times(item.dailyData.length - 20,
+    async.times(item.dailyData.length - 10,
         function( index, step ) {
           var last = item.dailyData[index];
           set.push(last);
           if ( set.length == DAYS ) {
             var i = input(set, avgVol, stdVol);
             var o = label(last, item.dailyData.slice(index + 1,
-                index + 21));
+                index + 11));
             labels.x.push(i);
             labels.y.push(o);
             set.shift();
@@ -245,7 +246,7 @@ var trainEntry = function( item, next ) {
           next();
         });
   } else {
-    next(false, labels);
+    next();
   }
 };
 
@@ -257,25 +258,21 @@ module.exports = exports = {
       async.eachSeries(stocks, trainEntry);
     });
   },
-  expect : function( entry ) {
+  expect : function( entry, notTrain ) {
     var data = entry.dailyData.slice(-DAYS);
     var code = entry.code;
-    var expect = [
-        0, 0, 0, 0, 0
-    ];
+    var expect = [];
     
-    if ( data.length === DAYS){
-      if ( !exports.net[code] ) {
-        entry.expect = exports.net[code].predict([
+    if ( data.length === DAYS ){
+      if ( typeof exports.net[code] !== 'undefined' ) {
+        expect = exports.net[code].predict([
           input(data)
         ])[0];
-      }else{
-        trainEntry(entry, function(){
-          console.log('TRAINING END', entry.code);
-        });
+      }else if ( !notTrain ){
+        console.log('NO TRAINED ENTRY FOR', code);
       }
     }
 
-    return entry;
+    return expect;
   }
 };

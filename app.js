@@ -112,8 +112,31 @@ app.get('/stock/:stock', function( req, res ) {
             if ( number ) {
               return numeral(number).format('0.0%');
             } else {
-              return '정보없음';
+              return '';
             }
+          },
+          prediction : function( number ) {
+            if ( number > 0.66 ) {
+              return '▲';
+            } else if ( number > 0.33){
+              return '○';
+            } else {
+              return '▼';
+            }
+          },
+          predStyle : function ( number ) {
+            if ( typeof number === 'number' ) {
+              return 'background:hsl('+Math.round(120 - number * 120)+',100%,100%)';
+            } else {
+              return 'opacity:0';
+            }
+          },
+          range : function ( start, end ) {
+            var range = [];
+            while ( start < end ){
+              range.push(start++);
+            }
+            return range;
           }
         });
       });

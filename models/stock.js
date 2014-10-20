@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var async = require('async');
 var Schema = mongoose.Schema;
 
-mongoose.connect('mongodb://bydelta.kr/stocks');
+mongoose.connect('mongodb://bydelta.kr/stocks', {keepAlive: 1});
 var StockScheme = {
   title : String,
   code : {
