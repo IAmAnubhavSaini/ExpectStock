@@ -126,7 +126,7 @@ app.get('/stock/:stock', function( req, res ) {
           },
           predStyle : function ( number ) {
             if ( typeof number === 'number' ) {
-              return 'background:hsl('+Math.round(120 - number * 120)+',100%,100%)';
+              return 'background:hsl('+Math.round(120 - number * 120)+',100%,50%)';
             } else {
               return 'opacity:0';
             }
