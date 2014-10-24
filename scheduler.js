@@ -29,4 +29,5 @@ schedule.scheduleJob(rule, function() {
   brain.train();
 });
 
+//crawler.today();
 brain.train();

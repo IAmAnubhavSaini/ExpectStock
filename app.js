@@ -110,15 +110,15 @@ app.get('/stock/:stock', function( req, res ) {
           },
           predictformat : function( number ) {
             if ( number ) {
-              return numeral(number).format('0.0%');
+              return numeral(number * 100).format('0.0');
             } else {
               return '';
             }
           },
           prediction : function( number ) {
-            if ( number > 0.66 ) {
+            if ( number > 0.5 ) {
               return '▲';
-            } else if ( number > 0.33){
+            } else if ( number > -0.5){
               return '○';
             } else {
               return '▼';
@@ -126,7 +126,7 @@ app.get('/stock/:stock', function( req, res ) {
           },
           predStyle : function ( number ) {
             if ( typeof number === 'number' ) {
-              return 'background:hsl('+Math.round(120 - number * 120)+',100%,50%)';
+              return 'background:hsl('+Math.round(60 + number * 60)+',100%,50%)';
             } else {
               return 'opacity:0';
             }
