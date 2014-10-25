@@ -23,26 +23,37 @@ app.get('/', function( req, res ) {
   res.set('Cache-Control', 'no-cache');
   stock.getAll(function( err, items ) {
     async.reduce(items, [], function(array, item, next){
-      var max = Math.max(item.expect[0], item.expect[1], item.expect[2]);
-      item.last.diff = item.last.close - item.prev.close;
+      var expect = [0, 0, 0];
+      for ( var i = 0; i < 10; i ++ ){
+        if ( item.expect[i] > 0.5 ){
+          expect[0]++;
+        }else if ( item.expect[i] < -0.5 ){
+          expect[2]++;
+        }else{
+          expect[1]++;
+        }
+      }
       
-      if ( max === item.expect[0] ){
+      item.last.diff = item.last.close - item.prev.close;
+      var max = Math.max(expect[0], expect[1], expect[2]);
+      
+      if ( max === expect[0] ){
         item.cls = 'success';
         array.unshift({
           last : item.last,
           code : item.code,
           title : item.title,
           cls : item.cls,
-          expect : item.expect
+          expect : expect
         });
-      }else if ( max === item.expect[2] ){
+      }else if ( max === expect[2] ){
         item.cls = 'danger';
         array.push({
           last : item.last,
           code : item.code,
           title : item.title,
           cls : item.cls,
-          expect : item.expect
+          expect : expect
         });
       }else{
         item.cls = '';
@@ -51,7 +62,7 @@ app.get('/', function( req, res ) {
           code : item.code,
           title : item.title,
           cls : item.cls,
-          expect : item.expect
+          expect : expect
         });
       }
       next(false,array);
