@@ -33,6 +33,16 @@ app.get('/', function( req, res ) {
         } else {
           return '0.0%';
         }
+      },
+      expectdays : function( prob ) {
+        var up = 0;
+        for(var i = 0; i < 10; i++){
+          if (prob[i] > 0.5){
+            up ++;
+          }
+        }
+        
+        return up+'일';
       }
     });
   });
@@ -113,15 +123,6 @@ app.get('/stock/:stock', function( req, res ) {
               return numeral(number * 100).format('0.0');
             } else {
               return '';
-            }
-          },
-          prediction : function( number ) {
-            if ( number > 0.5 ) {
-              return '▲';
-            } else if ( number > -0.5){
-              return '○';
-            } else {
-              return '▼';
             }
           },
           predStyle : function ( number ) {
