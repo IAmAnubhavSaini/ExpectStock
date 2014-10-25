@@ -12,17 +12,21 @@ html
       tr
        th 종목코드
        th 종목명
+       th.text-right 상승예측
        th.text-right 현재가
        th.text-right 시작가
        th.text-right 고가
        th.text-right 저가
        th.text-right 거래량
-       th.text-right 상승예측
       each item in stock
-       - var diff = item.last.close - item.prev.close;
-       tr(onclick='location.href="/stock/'+item.code+'";',class=(diff>0)?'success':'danger')
+       - var diff = item.last.diff;
+       tr(onclick='location.href="/stock/'+item.code+'";',class=item.cls)
         td= item.code
         td= item.title
+        td.text-right
+         | ↑#{item.expect[0]}&nbsp;
+         | 〓#{item.expect[1]}&nbsp;
+         | ↓#{item.expect[2]}
         td.text-right
          | #{'￦ '+currformat(item.last.close)} &nbsp;
          span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= (diff>0 ? '▲' + diff : '▼' + (-diff))
@@ -30,7 +34,6 @@ html
         td.text-right= '￦ '+currformat(item.last.high)
         td.text-right= '￦ '+currformat(item.last.low)
         td.text-right= currformat(item.last.volume)
-        td.text-right= expectdays(item.expect)
      form(method='get',action='/add')
       div.input-group
        input.form-control(type='text',name='stock',placeholder='종목코드?')

@@ -22,32 +22,49 @@ app.use('/static', express.static(__dirname + '/public'));
 app.get('/', function( req, res ) {
   res.set('Cache-Control', 'no-cache');
   stock.getAll(function( err, items ) {
-    res.render('index.jade', {
-      stock : items,
-      currformat : function( curr ) {
-        return numeral(curr).format('0,0');
-      },
-      probformat : function( prob ) {
-        if ( prob ) {
-          return numeral(prob).format('0.0%');
-        } else {
-          return '0.0%';
-        }
-      },
-      expectdays : function( prob ) {
-        var up = 0, stab = 0, down = 0;
-        for(var i = 0; i < 10; i++){
-          if (prob[i] > 0.5){
-            up ++;
-          }else if (prob[i] < -0.5){
-            down ++;
-          }else{
-            stab ++;
+    async.reduce(items, [], function(array, item, next){
+      var max = Math.max(item.expect[0], item.expect[1], item.expect[2]);
+      item.last.diff = item.last.close - item.prev.close;
+      
+      if ( max === item.expect[0] ){
+        item.cls = 'success';
+        array.unshift({
+          last : item.last,
+          code : item.code,
+          title : item.title,
+          cls : item.cls
+        });
+      }else if ( max === item.expect[2] ){
+        item.cls = 'danger';
+        array.push({
+          last : item.last,
+          code : item.code,
+          title : item.title,
+          cls : item.cls
+        });
+      }else{
+        item.cls = '';
+        array.push({
+          last : item.last,
+          code : item.code,
+          title : item.title,
+          cls : item.cls
+        });
+      }
+    }, function(err, array){
+      res.render('index.jade', {
+        stock : array,
+        currformat : function( curr ) {
+          return numeral(curr).format('0,0');
+        },
+        probformat : function( prob ) {
+          if ( prob ) {
+            return numeral(prob).format('0.0%');
+          } else {
+            return '0.0%';
           }
         }
-        
-        return up+'-'+stab+'-'+down;
-      }
+      });      
     });
   });
 });
