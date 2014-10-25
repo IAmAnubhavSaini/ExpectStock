@@ -32,7 +32,8 @@ app.get('/', function( req, res ) {
           last : item.last,
           code : item.code,
           title : item.title,
-          cls : item.cls
+          cls : item.cls,
+          expect : item.expect
         });
       }else if ( max === item.expect[2] ){
         item.cls = 'danger';
@@ -40,7 +41,8 @@ app.get('/', function( req, res ) {
           last : item.last,
           code : item.code,
           title : item.title,
-          cls : item.cls
+          cls : item.cls,
+          expect : item.expect
         });
       }else{
         item.cls = '';
@@ -48,7 +50,8 @@ app.get('/', function( req, res ) {
           last : item.last,
           code : item.code,
           title : item.title,
-          cls : item.cls
+          cls : item.cls,
+          expect : item.expect
         });
       }
       next(false,array);
