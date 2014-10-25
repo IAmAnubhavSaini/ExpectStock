@@ -41,24 +41,24 @@ html
         p
          span.label.label-info 종가
          | &nbsp; 
-         - var slice = 1.04;
          each i in range(0, 10)
           span.label(style=predStyle(expect[i]), title=predictformat(expect[i])) &nbsp;
-          - slice = slice - 0.02;
         p
          span.label.label-warning 고가
          | &nbsp; 
-         - slice = 1.04;
-         each i in range(10, 20)
-          span.label(style=predStyle(expect[i]), title=predictformat(expect[i])) &nbsp;
-          - slice = slice - 0.02;
+         each i in range(10, 14)
+          span.label(style=predStyle(expect[i]), title=(i-13)+' steps,'+predictformat(expect[i])) &nbsp;
+         | &nbsp;
+         each i in range(15, 20)
+          span.label(style=predStyle(expect[i]), title=(i-13)+' steps,'+predictformat(expect[i])) &nbsp;
         p
          span.label.label-info 저가
          | &nbsp; 
-         - slice = 1.04;
-         each i in range(20, 30)
-          span.label(style=predStyle(expect[i]), title=predictformat(expect[i])) &nbsp;
-          - slice = slice - 0.02;
+         each i in range(20, 24)
+          span.label(style=predStyle(expect[i]), title=(i-23)+' steps,'+predictformat(expect[i])) &nbsp;
+         | &nbsp;
+         each i in range(25, 30)
+          span.label(style=predStyle(expect[i]), title=(i-23)+' steps,'+predictformat(expect[i])) &nbsp;
      .panel.panel-info
       .panel-heading
        h4 종목 차트
