@@ -51,6 +51,7 @@ app.get('/', function( req, res ) {
           cls : item.cls
         });
       }
+      next(false,array);
     }, function(err, array){
       res.render('index.jade', {
         stock : array,
