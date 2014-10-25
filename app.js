@@ -35,14 +35,18 @@ app.get('/', function( req, res ) {
         }
       },
       expectdays : function( prob ) {
-        var up = 0;
+        var up = 0, stab = 0, down = 0;
         for(var i = 0; i < 10; i++){
           if (prob[i] > 0.5){
             up ++;
+          }else if (prob[i] < -0.5){
+            down ++;
+          }else{
+            stab ++;
           }
         }
         
-        return up+'일';
+        return up+'-'+stab+'-'+down;
       }
     });
   });
