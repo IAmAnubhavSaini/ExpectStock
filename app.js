@@ -33,38 +33,23 @@ app.get('/', function( req, res ) {
           expect[1]++;
         }
       }
+
+      var last = item.dailyData[item.dailyData.length - 1];
+      var prev = item.dailyData[item.dailyData.length - 2];
+      last.diff = last.close - prev.close;
       
-      item.last.diff = item.last.close - item.prev.close;
       var max = Math.max(expect[0], expect[1], expect[2]);
       
       if ( max === expect[0] ){
         item.cls = 'success';
-        array.unshift({
-          last : item.last,
-          code : item.code,
-          title : item.title,
-          cls : item.cls,
-          expect : expect
-        });
       }else if ( max === expect[2] ){
         item.cls = 'danger';
-        array.push({
-          last : item.last,
-          code : item.code,
-          title : item.title,
-          cls : item.cls,
-          expect : expect
-        });
       }else{
         item.cls = '';
-        array.push({
-          last : item.last,
-          code : item.code,
-          title : item.title,
-          cls : item.cls,
-          expect : expect
-        });
       }
+      
+      item.last = last;
+      
       next(false,array);
     }, function(err, array){
       res.render('index.jade', {
