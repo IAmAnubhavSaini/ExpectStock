@@ -28,16 +28,16 @@ html
          span.label.label-warning= item.expect[1]
          span.label.label-danger= item.expect[2]
         td.text-right
-         | #{'￦ '+currformat(item.last.close)} &nbsp;
+         | #{currformat(item.last.close)} &nbsp;
          span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= (diff>0 ? '▲' + diff : '▼' + (-diff))
         td.text-right
-         | #{'￦ '+currformat(item.last.start)}
+         | #{currformat(item.last.start)}
         td.text-right
-         | #{'￦ '+currformat(item.last.high)}
+         | #{currformat(item.last.high)}
          if item.thresholds
           span.label.label-info.pull-right= item.thresholds.sell
         td.text-right
-         | #{'￦ '+currformat(item.last.low)}
+         | #{currformat(item.last.low)}
          if item.thresholds
           span.label.label-info.pull-right= item.thresholds.buy
         td.text-right= Math.round(item.last.volume / 1000)+'K'
