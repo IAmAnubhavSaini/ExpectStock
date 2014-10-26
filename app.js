@@ -49,6 +49,7 @@ app.get('/', function( req, res ) {
       }
       
       item.last = last;
+      item.expect = expect;
       next(false);
     }, function(err){
       res.render('index.jade', {
