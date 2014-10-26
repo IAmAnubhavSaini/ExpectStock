@@ -17,10 +17,10 @@ html
        - var balance = (stock.bal + stock.amount * price);
        p
         span.label.label-info 수익률
-        | #{Math.round(balance / 10000) / 100} %
+        | &nbsp;#{Math.round(balance / 10000) / 100} %
        p
         span.label.label-info 이익금
-        | #{currformat(balance - 1000000)}
+        | &nbsp;#{currformat(balance - 1000000)}
      .panel.panel-success
       .panel-heading
        h4 종목 예측 정보
