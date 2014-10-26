@@ -9,30 +9,18 @@ html
     span.label.label-success.pull-left= code
     span &nbsp; #{title}
    .row
-    .col-md-8
-     .panel.panel-warning
-      .panel-heading
-       h4 종목 과거 정보
-      .panel-body
-       table.table.table-striped.table-hover.table-condense
-        tr
-         th 일자
-         th 시가
-         th 종가
-         th 변동폭
-         th 고가
-         th 저가
-        - var prev = {};
-        each item in curr
-         tr(class=(item.diff>0)?'success':'danger')
-          td= dateformat(item.at)
-          td.text-right= currformat(item.start)
-          td.text-right= currformat(item.close)
-          td.text-right= diffformat(item.diff)
-          td.text-right= currformat(item.high)
-          td.text-right= currformat(item.low)
-          - prev = item;
     .col-md-4
+     .panel.panel-info
+      .panel-heading
+       h4 모의 투자
+      .panel-body
+       - var balance = (stock.bal + stock.amount * price);
+       p
+        span.label.label-info 수익률
+        | #{Math.round(balance / 10000) / 100} %
+       p
+        span.label.label-info 이익금
+        | #{currformat(balance - 1000000)}
      .panel.panel-success
       .panel-heading
        h4 종목 예측 정보
@@ -65,3 +53,26 @@ html
        canvas#vol-chart(height='100')
        script(src='/static/chart.js')
        script(src='/chart?id='+code+'&cb=loaded')
+    .col-md-8
+     .panel.panel-warning
+      .panel-heading
+       h4 종목 과거 정보
+      .panel-body
+       table.table.table-striped.table-hover.table-condense
+        tr
+         th 일자
+         th 시가
+         th 종가
+         th 변동폭
+         th 고가
+         th 저가
+        - var prev = {};
+        each item in curr
+         tr(class=(item.diff>0)?'success':'danger')
+          td= dateformat(item.at)
+          td.text-right= currformat(item.start)
+          td.text-right= currformat(item.close)
+          td.text-right= diffformat(item.diff)
+          td.text-right= currformat(item.high)
+          td.text-right= currformat(item.low)
+          - prev = item;

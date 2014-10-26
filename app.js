@@ -132,6 +132,10 @@ app.get('/stock/:stock', function( req, res ) {
           title : item.title,
           curr : rev,
           price : rev[0].close,
+          stock : {
+            amount : item.amount,
+            bal : item.balance
+          },
           expect : item.expect,
           dateformat : function( date ) {
             if ( date ) {
