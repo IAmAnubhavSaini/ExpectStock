@@ -22,7 +22,7 @@ app.use('/static', express.static(__dirname + '/public'));
 app.get('/', function( req, res ) {
   res.set('Cache-Control', 'no-cache');
   stock.getAll(function( err, items ) {
-    async.reduce(items, [], function(array, item, next){
+    async.each(items, function(item, next){
       var expect = [0, 0, 0];
       for ( var i = 0; i < 10; i ++ ){
         if ( item.expect[i] > 0.5 ){
@@ -49,11 +49,10 @@ app.get('/', function( req, res ) {
       }
       
       item.last = last;
-      
-      next(false,array);
-    }, function(err, array){
+      next(false);
+    }, function(err){
       res.render('index.jade', {
-        stock : array,
+        stock : items,
         currformat : function( curr ) {
           return numeral(curr).format('0,0');
         },
