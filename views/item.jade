@@ -38,6 +38,8 @@ html
        h4 종목 예측 정보
       .panel-body
        if expect
+        - var step = (price > 500000) ? 1000 : ((price > 100000) ? 500 : ((price > 50000) ? 100 : ((price > 10000) ? 50 : 10)))
+        - step = step * 2;
         p
          span.label.label-info 종가
          | &nbsp; 
@@ -46,19 +48,13 @@ html
         p
          span.label.label-warning 고가
          | &nbsp; 
-         each i in range(10, 14)
-          span.label(style=predStyle(expect[i]), title=(i-13)+' steps,'+predictformat(expect[i])) &nbsp;
-         | &nbsp;
-         each i in range(14, 20)
-          span.label(style=predStyle(expect[i]), title=(i-13)+' steps,'+predictformat(expect[i])) &nbsp;
+         each i in range(10, 20)
+          span.label(style=predStyle(expect[i]), title=currformat((i-10) * step + price)+', '+predictformat(expect[i])) &nbsp;
         p
          span.label.label-info 저가
          | &nbsp; 
-         each i in range(20, 24)
-          span.label(style=predStyle(expect[i]), title=(i-23)+' steps,'+predictformat(expect[i])) &nbsp;
-         | &nbsp;
-         each i in range(24, 30)
-          span.label(style=predStyle(expect[i]), title=(i-23)+' steps,'+predictformat(expect[i])) &nbsp;
+         each i in range(20, 30)
+          span.label(style=predStyle(expect[i]), title=currformat((i-10) * step + price)+', '+predictformat(expect[i])) &nbsp;
      .panel.panel-info
       .panel-heading
        h4 종목 차트
