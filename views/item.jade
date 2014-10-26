@@ -49,12 +49,12 @@ html
          span.label.label-warning 고가
          | &nbsp; 
          each i in range(10, 20)
-          span.label(style=predStyle(expect[i]), title=currformat((i-10) * step + price)+', '+predictformat(expect[i])) &nbsp;
+          span.label(style=predStyle(expect[i]), title=currformat((i-10) * step + curr[0].high)+', '+predictformat(expect[i])) &nbsp;
         p
          span.label.label-info 저가
          | &nbsp; 
          each i in range(20, 30)
-          span.label(style=predStyle(expect[i]), title=currformat((i-10) * step + price)+', '+predictformat(expect[i])) &nbsp;
+          span.label(style=predStyle(expect[i]), title=currformat((i-10) * step + curr[0].low)+', '+predictformat(expect[i])) &nbsp;
      .panel.panel-info
       .panel-heading
        h4 종목 차트
