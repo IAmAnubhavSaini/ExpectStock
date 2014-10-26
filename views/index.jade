@@ -34,10 +34,10 @@ html
          | #{'￦ '+currformat(item.last.start)}
         td.text-right
          | #{'￦ '+currformat(item.last.high)}
-         span.label.label-info.pull-right= item.stock.high;
+         span.label.label-info.pull-right= item.stock.high
         td.text-right
          | #{'￦ '+currformat(item.last.low)}
-         span.label.label-info.pull-right= item.stock.low;
+         span.label.label-info.pull-right= item.stock.low
         td.text-right= Math.round(item.last.volume / 1000)+'K'
      form(method='get',action='/add')
       div.input-group
