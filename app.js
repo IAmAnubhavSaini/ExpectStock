@@ -118,9 +118,7 @@ app.get('/stock/:stock', function( req, res ) {
           price : rev[0].close,
           stock : {
             amount : item.amount,
-            bal : item.balance,
-            high : item.thresholds.sell,
-            low : item.thresholds.buy
+            bal : item.balance
           },
           expect : item.expect,
           dateformat : function( date ) {
