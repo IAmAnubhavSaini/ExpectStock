@@ -54,7 +54,7 @@ html
          span.label.label-info 저가
          | &nbsp; 
          each i in range(20, 30)
-          span.label(style=predStyle(expect[i]), title=currformat((i-10) * step + curr[0].low)+', '+predictformat(expect[i])) &nbsp;
+          span.label(style=predStyle(expect[i]), title=currformat((20-i) * step + curr[0].low)+', '+predictformat(expect[i])) &nbsp;
      .panel.panel-info
       .panel-heading
        h4 종목 차트
