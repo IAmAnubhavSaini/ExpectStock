@@ -12,23 +12,35 @@ html
       tr
        th 종목코드
        th 종목명
-       th.text-right 현재가
-       th.text-right 시작가
-       th.text-right 고가
-       th.text-right 저가
+       th.text-right 상승예측
+       th.text-right 종
+       th.text-right 시
+       th.text-right 고
+       th.text-right 저
        th.text-right 거래량
       each item in stock
-       - var diff = item.last.close - item.prev.close;
-       tr(onclick='location.href="/stock/'+item.code+'";',class=(diff>0)?'success':'danger')
+       - var diff = item.last.diff;
+       tr(onclick='location.href="/stock/'+item.code+'";',class=item.cls)
         td= item.code
         td= item.title
         td.text-right
-         | #{'￦ '+currformat(item.last.close)} &nbsp;
+         span.label.label-success= item.expect[0]
+         span.label.label-warning= item.expect[1]
+         span.label.label-danger= item.expect[2]
+        td.text-right
+         | #{currformat(item.last.close)} &nbsp;
          span.label.pull-left(class=(diff>0)?'label-success':'label-danger')= (diff>0 ? '▲' + diff : '▼' + (-diff))
-        td.text-right= '￦ '+currformat(item.last.start)
-        td.text-right= '￦ '+currformat(item.last.high)
-        td.text-right= '￦ '+currformat(item.last.low)
-        td.text-right= currformat(item.last.volume)
+        td.text-right
+         | #{currformat(item.last.start)}
+        td.text-right
+         | #{currformat(item.last.high)}
+         if item.thresholds
+          span.label.label-info.pull-right= item.thresholds.sell
+        td.text-right
+         | #{currformat(item.last.low)}
+         if item.thresholds
+          span.label.label-info.pull-right= item.thresholds.buy
+        td.text-right= Math.round(item.last.volume / 1000)+'K'
      form(method='get',action='/add')
       div.input-group
        input.form-control(type='text',name='stock',placeholder='종목코드?')

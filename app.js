@@ -22,18 +22,49 @@ app.use('/static', express.static(__dirname + '/public'));
 app.get('/', function( req, res ) {
   res.set('Cache-Control', 'no-cache');
   stock.getAll(function( err, items ) {
-    res.render('index.jade', {
-      stock : items,
-      currformat : function( curr ) {
-        return numeral(curr).format('0,0');
-      },
-      probformat : function( prob ) {
-        if ( prob ) {
-          return numeral(prob).format('0.0%');
-        } else {
-          return '0.0%';
+    async.each(items, function(item, next){
+      var expect = [0, 0, 0];
+      for ( var i = 0; i < 10; i ++ ){
+        if ( item.expect[i] > 0.5 ){
+          expect[0]++;
+        }else if ( item.expect[i] < -0.5 ){
+          expect[2]++;
+        }else{
+          expect[1]++;
         }
       }
+
+      var last = item.dailyData[item.dailyData.length - 1];
+      var prev = item.dailyData[item.dailyData.length - 2];
+      last.diff = last.close - prev.close;
+      
+      var max = Math.max(expect[0], expect[1], expect[2]);
+      
+      if ( max === expect[0] ){
+        item.cls = 'success';
+      }else if ( max === expect[2] ){
+        item.cls = 'danger';
+      }else{
+        item.cls = '';
+      }
+      
+      item.last = last;
+      item.expect = expect;
+      next(false);
+    }, function(err){
+      res.render('index.jade', {
+        stock : items,
+        currformat : function( curr ) {
+          return numeral(curr).format('0,0');
+        },
+        probformat : function( prob ) {
+          if ( prob ) {
+            return numeral(prob).format('0.0%');
+          } else {
+            return '0.0%';
+          }
+        }
+      });      
     });
   });
 });
@@ -86,6 +117,10 @@ app.get('/stock/:stock', function( req, res ) {
           title : item.title,
           curr : rev,
           price : rev[0].close,
+          stock : {
+            amount : item.amount,
+            bal : item.balance
+          },
           expect : item.expect,
           dateformat : function( date ) {
             if ( date ) {
@@ -113,15 +148,6 @@ app.get('/stock/:stock', function( req, res ) {
               return numeral(number * 100).format('0.0');
             } else {
               return '';
-            }
-          },
-          prediction : function( number ) {
-            if ( number > 0.5 ) {
-              return '▲';
-            } else if ( number > -0.5){
-              return '○';
-            } else {
-              return '▼';
             }
           },
           predStyle : function ( number ) {

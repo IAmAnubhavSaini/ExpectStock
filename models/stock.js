@@ -70,18 +70,6 @@ module.exports = {
     });
   },
   getAll : function( callback ) {
-    Stock.find({}, function( err, stocks ) {
-      async.reduce(stocks, [], function( set, stock, cb ) {
-        set.push({
-          code : stock.code,
-          title : stock.title,
-          last : stock.dailyData[stock.dailyData.length - 1],
-          prev : stock.dailyData[stock.dailyData.length - 2],
-          dailyData : stock.dailyData,
-          expect : stock.expect
-        });
-        cb(false, set);
-      }, callback);
-    });
+    Stock.find({}, callback);
   }
 }
