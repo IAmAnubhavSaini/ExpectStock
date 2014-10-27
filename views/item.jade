@@ -14,7 +14,7 @@ html
       .panel-heading
        h4 모의 투자
       .panel-body
-       - var balance = (stock.bal + stock.amount * price);
+       - var balance = (stock.bal + stock.amount * price - 1000000);
        p
         span.label.label-info 수익률
         | &nbsp;#{Math.round(balance / 10000) / 100} %

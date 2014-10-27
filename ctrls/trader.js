@@ -37,7 +37,7 @@ module.exports = exports = {
               item.balance = 1000000;
               item.amount = 0;
               item.trade = [];
-              item.thresholds = {};
+              item.thr = {};
             }
             
             var step = 10;
@@ -53,12 +53,12 @@ module.exports = exports = {
             }
             step *= 2;
             
-            if ( typeof item.thresholds !== 'undefined' && typeof item.thresholds.buy !== 'undefined' ){
+            if ( typeof item.thr !== 'undefined' && typeof item.thr.buy !== 'undefined' ){
               var week = item.dailyData.slice(-5);
               var high = max(week, 'high');
               var low = min(week, 'low');
               
-              if ( item.trade.length > 0 && high > item.thresholds.sell && item.thresholds.updays < 5 ){
+              if ( item.trade.length > 0 && high > item.thr.sell && item.thr.updays < 5 ){
                 if ( Math.random() > 0.3 ){
                   var prev = item.trade.shift();
                   console.log('SELL', prev.price,'x',prev.amount, 'AT', high);
@@ -67,8 +67,8 @@ module.exports = exports = {
                 }
               }
               
-              if ( low < item.thresholds.buy && item.thresholds.updays > 5 ){
-                var amount = item.thresholds.updays;
+              if ( low < item.thr.buy && item.thr.updays > 5 ){
+                var amount = item.thr.updays;
                 if ( low * amount < item.balance && Math.random() > 0.3 ){
                   console.log('BUY', low,'x',amount);
                   item.balance -= low * amount;
@@ -86,11 +86,11 @@ module.exports = exports = {
               var sell = index(item.expect, 10, 20, 0.5) - 10;
               var buy = index(item.expect, 20, 30, 0.5) - 20;
               
-              item.thresholds = {};
-              item.thresholds.updays = buyamount;
-              item.thresholds.sell = curr.high + step * sell;
-              item.thresholds.buy = curr.low - step * buy;
-              console.log('SET THR', item.thresholds);
+              item.thr = {};
+              item.thr.updays = buyamount;
+              item.thr.sell = curr.high + step * sell;
+              item.thr.buy = curr.low - step * buy;
+              console.log('SET THR', item.thr);
             }
             
             item.save(function(err){

@@ -34,12 +34,12 @@ html
          | #{currformat(item.last.start)}
         td.text-right
          | #{currformat(item.last.high)}
-         if item.thresholds
-          span.label.label-info.pull-right= item.thresholds.sell
+         if item.thr
+          span.label.label-info.pull-right= item.thr.sell
         td.text-right
          | #{currformat(item.last.low)}
-         if item.thresholds
-          span.label.label-info.pull-right= item.thresholds.buy
+         if item.thr
+          span.label.label-info.pull-right= item.thr.buy
         td.text-right= Math.round(item.last.volume / 1000)+'K'
      form(method='get',action='/add')
       div.input-group

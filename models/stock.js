@@ -26,7 +26,7 @@ var StockScheme = {
   ],
   expect : [],
   trade : [],
-  thresholds : {},
+  thr : {},
   amount : Number,
   balance : Number
 };
