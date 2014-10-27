@@ -24,7 +24,11 @@ var StockScheme = {
       volume : Number
     }
   ],
-  expect : []
+  expect : [],
+  trade : [],
+  thresholds : {},
+  amount : Number,
+  balance : Number
 };
 
 var Stock = mongoose.model('Stock', new Schema(StockScheme));

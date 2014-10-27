@@ -1,11 +1,12 @@
 /**
  * New node file
  */
-var brain = require('dnn');
+var brain = require('brain');
 var stock = require('../models/stock');
 var async = require('async');
+var trader = require('./trader');
 
-const DAYS = 10 + 15;
+const DAYS = 15 + 20;
 
 var max = function( array, key ) {
   var max = Number.MIN_VALUE;
@@ -57,20 +58,20 @@ var input = function( train ) {
   var out = [], prev = [];
   var push = function( value ) {
     if ( isNaN(value) || value === undefined ) {
-      out.push(0.);
+      out.push(0.5);
     } else if ( value > 1 ) {
-      out.push(1.);
-    } else if ( value < -1 ) {
-      out.push(-1.);
+      out.push(1);
+    } else if ( value < 0 ) {
+      out.push(0);
     } else {
       out.push(value);
     }
   };
   var norm = function( value ) {
     if ( interval.high === interval.low ) {
-      return 0.;
+      return 0.5;
     } else {
-      return (value - interval.low) / (interval.high - interval.low) * 2. - 1.;
+      return (value - interval.low) / (interval.high - interval.low);
     }
   };
   
@@ -96,7 +97,7 @@ var input = function( train ) {
     item.MFneg = (item.typical < yesterday.typical) ? item.typical * item.volume : 0.;
     prev.push(item);
 
-    if ( prev.length === 15 ) {
+    if ( prev.length === 20 ) {
       // MA
       item.ma15 = avg(prev, 'close');
       item.ma7 = avg(prev.slice(-7), 'close');
@@ -107,30 +108,26 @@ var input = function( train ) {
         push(1);
       }else if ( (item.MACD < item.MACDsignal && yesterday.MACD > yesterday.MACDsignal)
         ||(item.MACD < 0 && yesterday.MACD > 0) ){
-        push(-1);
-      }else{
         push(0);
+      }else{
+        push(0.5);
       }
       
       // Volume
-      push ((item.volume > avg(prev, 'volume')) ? 1. : -1.);
+      push ((item.volume > avg(prev, 'volume')) ? 1 : 0);
       
       // RSI
       item.RSI = avg(prev, 'pos') / (avg(prev, 'pos') + avg(prev, 'neg'));
       if ( (item.RSI < 0.3 && item.RSI < yesterday.RSI && item.RSI > min(prev, 'RSI')) || (item.RSI > 0.5 && yesterday.RSI < 0.5) ){
         push(1);
       }else if ( (item.RSI > 0.7 && item.RSI > yesterday.RSI && item.RSI < max(prev, 'RSI')) || (item.RSI < 0.5 && yesterday.RSI > 0.5) ){
-        push(-1);
-      }else{
         push(0);
-      }
-      
-      if (item.RSI < 0.3){
-        push(1);
+      }else if (item.RSI < 0.3){
+        push(0.75);
       }else if (item.RSI > 0.7){
-        push(-1);
+        push(0.25);
       }else{
-        push(0);
+        push(0.5);
       }
       
       // Stochastic-K
@@ -138,58 +135,46 @@ var input = function( train ) {
       // Stochastic-D
       item.stochD = avg(prev, 'stochK');
       
-      if ( item.stochD > 0.8 || (item.stochD < item.stochK && yesterday.stochD > yesterday.stochK) ){
-        push(-1);
-      }else if ( item.stochD < 0.2 || (item.stochD > item.stochK && yesterday.stochD < yesterday.stochK) ){
-        push(1);
-      }else{
-        push(0);
-      }
-      
       if (item.stochD < 0.2 && item.stochD < yesterday.stochD && item.stochD > min(prev, 'stochD')){
         push(1);
       }else if (item.stochD > 0.8 && item.stochD > yesterday.stochD && item.stochD < max(prev, 'stochD')){
-        push(-1);
-      }else{
         push(0);
+      }else if ( item.stochD > 0.8 || (item.stochD < item.stochK && yesterday.stochD > yesterday.stochK) ){
+        push(0.25);
+      }else if ( item.stochD < 0.2 || (item.stochD > item.stochK && yesterday.stochD < yesterday.stochK) ){
+        push(0.75);
+      }else{
+        push(0.5);
       }
       
       // CCI[-1, 1]
       item.CCI = (item.close - item.ma15) / (std(prev, 'close') * 1.5);
       
-      if ( item.CCI > 1 || (item.CCI < 0 && yesterday.CCI > 0) ){
-        push(-1);
-      }else if ( item.CCI < -1 || (item.CCI > 0 && yesterday.CCI < 0) ){
-        push(1);
-      }else{
-        push(0);
-      }
-      
       if (item.CCI < -1 && item.CCI < yesterday.CCI && item.CCI > min(prev, 'CCI')){
         push(1);
       }else if (item.CCI > 1 && item.CCI > yesterday.CCI && item.CCI < max(prev, 'CCI')){
-        push(-1);
-      }else{
         push(0);
+      }else if ( item.CCI > 1 || (item.CCI < 0 && yesterday.CCI > 0) ){
+        push(0.25);
+      }else if ( item.CCI < -1 || (item.CCI > 0 && yesterday.CCI < 0) ){
+        push(0.75);
+      }else{
+        push(0.5);
       }
       
       // ROC[-1, 1]
       item.ROC = (item.close - prev[0].close) / (prev[0].close);
       
-      if ( item.ROC > 0 && yesterday.ROC < 0 ) {
-        push(1);
-      }else if ( item.ROC < 0 && yesterday.ROC > 0 ) {
-        push(-1);
-      }else{
-        push(0);
-      }
-      
       if (item.ROC < yesterday.ROC && item.ROC > min(prev, 'ROC')){
         push(1);
       }else if (item.ROC > yesterday.ROC && item.ROC < max(prev, 'ROC')){
-        push(-1);
-      }else{
         push(0);
+      }else if ( item.ROC > 0 && yesterday.ROC < 0 ) {
+        push(0.75);
+      }else if ( item.ROC < 0 && yesterday.ROC > 0 ) {
+        push(0.25);
+      }else{
+        push(0.5);
       }
       
       // DMI/100
@@ -199,48 +184,39 @@ var input = function( train ) {
       item.DIneg = ema(prev, 'DMneg') / (avg(prev, 'TR') * 100);
       item.DIdiff = Math.abs(item.DIpos - item.DIneg);
       
-      if ( item.DIneg < item.DIpos && (yesterday.DIneg > yesterday.DIpos || yesterday.DIdiff < item.DIdiff) ){
-        push(1);
-      }else if ( item.DIneg > item.DIpos && (yesterday.DIneg < yesterday.DIpos || yesterday.DIdiff > yesterday.DIdiff) ){
-        push(-1);
-      }else{
-        push(0);
-      }
-      
       if ( yesterday.DIdiff < item.DIdiff && yesterday.DIdiff === max(prev, 'DIdiff') ){
         if ( item.DIneg < item.DIpos ){
-          push(-1);
+          push(0);
         }else {
           push(1);
         }
+      }else if ( item.DIneg < item.DIpos && (yesterday.DIneg > yesterday.DIpos || yesterday.DIdiff < item.DIdiff) ){
+        push(0.75);
+      }else if ( item.DIneg > item.DIpos && (yesterday.DIneg < yesterday.DIpos || yesterday.DIdiff > yesterday.DIdiff) ){
+        push(0.25);
       }else{
-        push(0);
+        push(0.5);
       }
       
       // MFI[-1, 1]
       item.MFI = avg(prev, 'MFpos') / (avg(prev, 'MFpos') + avg(prev, 'MFneg')) * 2. - 1.;
       
-      if ( item.MFI < 0.2 ) {
-        push(1);
-      }else if ( item.MFI > 0.8 ) {
-        push(-1);
-      }else{
-        push(0);
-      }
-      
       if ( item.MFI < 0.2 && item.MFI < yesterday.MFI && item.MFI > min(prev, 'MFI')){
         push(1);
       }else if ( item.MFI > 0.8 && item.MFI > yesterday.MFI && item.MFI < max(prev, 'MFI')){
-        push(-1);
-      }else{
         push(0);
+      }else if ( item.MFI < 0.2 ) {
+        push(0.75);
+      }else if ( item.MFI > 0.8 ) {
+        push(0.25);
+      }else{
+        push(0.5);
       }
       
-      push(item.close > item.start ? 1 : -1);
-      push(item.close > yesterday.close ? 1 : -1);
-      push(item.close > item.typical ? 1 : -1);
-      push(item.high > yesterday.high ? 1 : -1);
-      push(item.low < yesterday.low ? 1 : -1);
+      push(norm(item.close));
+      push(norm(item.high));
+      push(norm(item.low));
+      push(norm(item.start));
       
       prev.shift();
     }
@@ -251,92 +227,114 @@ var input = function( train ) {
 
 var label = function( curr, next ) {
   var result = [];
+  var step = 10;
+  if( curr.close > 500000 ){
+    step = 1000;
+  }else if ( curr.close > 100000 ){
+    step = 500;
+  }else if ( curr.close > 50000 ){
+    step = 100;
+  }else if ( curr.close > 10000 ){ 
+    step = 50;
+  }
+  step *= 2;
   
-  var writer = function(key, upmove){
-    var today = curr[key];
+  var steps = function(key, fn){
+    var peak = fn(next, key);
+    var diff = Math.abs(peak - curr[key]);
     for ( var i = 0; i < next.length; i ++ ){
-      var tomorrow = next[i][key];
-      result.push((tomorrow > today) ? upmove : -upmove);
-      today = tomorrow;
+      if ( diff > step * i ){
+        result.push( 1 );
+      }else{
+        result.push( 0 );
+      }
     }
   };
   
-  writer('close', 1);
-  writer('high', 1);
-  writer('low', -1);
+  var days = function(key){
+    var upper = curr[key] + step, lower = curr[key] - step;
+    var up = 0, st = 0, dn = 0;
+    for ( var i = 0; i < next.length; i ++ ){
+      if ( next[i][key] > upper ){
+        up++;
+      }else if ( next[i][key] < lower ){
+        dn++;
+      }else{
+        st++;
+      }
+    }
+    
+    for ( var i = 0; i < next.length; i++ ){
+      if ( i < up ){
+        result.push(1);
+      }else if ( i < up + st ){
+        result.push(0.5);
+      }else{
+        result.push(0);
+      }
+    }
+  };
+  
+  days('close');
+  steps('high', max);
+  steps('low', min);
   
   return result;
 };
 
 var hLayerSizes = function( xlen, ylen ) {
   var h = [];
-  h.push(Math.ceil( (xlen * 2 + ylen) / 3 ));
-  h.push(Math.floor( (xlen + ylen * 2) / 3 ));
+  h.push(Math.floor( (xlen * 3 + ylen) / 4 ));
+  h.push(Math.floor( (xlen + ylen) / 2 ));
+  h.push(Math.floor( (xlen + ylen * 3) / 4 ));
 
   return h;
 };
 
-var trainAndExpect = function( err, labels ) {
-  if ( labels.x.length > 0 ) {
-    var nIn = labels.x[0].length;
-    var nOut = labels.y[0].length;
-    console.log('TRAIN SET CREATION COMPLETE : ' + labels.x.length
-      + ' x ' + nIn);
+var trainAndExpect = function( labels, callback ) {
+  if ( labels.io.length > 0 ) {
+    var nIn = labels.io[0].input.length;
+    var nOut = labels.io[0].output.length;
     var layers = hLayerSizes(nIn, nOut);
-    console.log('LAYERS : ' + layers.join('→') + '→' + nOut);
-    if ( !exports.net ) {
-      exports.net = new brain.DBN({
-        'input' : labels.x,
-        'label' : labels.y,
-        'n_ins' : nIn,
-        'n_outs' : nOut,
-        'hidden_layer_sizes' : layers
-      });
-      //exports.net.set('log level', 0);
-      //console.log(new Date(), 'START PRE_TRAINING (NEW)');
-      exports.net.pretrain({
-        'lr' : 0.8,
-        'k' : 1,
-        'epochs' : 100
-      });
-      //console.log(new Date(), 'START TRAINING');
-      exports.net.finetune({
-        'lr' : 0.84,
-        'epochs' : 50
-      });
-    } else {
-      exports.net.x = labels.x;
-      exports.net.y = labels.y;
-      //console.log(new Date(), 'START PRE_TRAINING');
-      exports.net.pretrain({
-        'lr' : 0.8,
-        'k' : 1,
-        'epochs' : 20
-      });
-      //console.log(new Date(), 'START TRAINING');
-      exports.net.finetune({
-        'lr' : 0.84,
-        'epochs' : 10
-      });
-    }
+    var code = labels.code;
     
-    async.each(labels.codes, function(code, next){
-      stock.load(code, function( err, entry ) {
-        entry.expect = exports.expect(entry);
-        entry.save(function() {
-          console.log('EXPECTED', entry.title);
-          next();
-        });
+    console.log('TRAIN : ' + labels.io.length + ' x ' + nIn + '→' + layers.join('→') + '→' + nOut);
+    if ( !exports.net[code] ) {
+      exports.net[code] = new brain.NeuralNetwork({
+        hiddenLayers: layers,
+        learningRate: 0.3
+      });
+      exports.net[code]._trOption = {
+        errorThresh: 0.01,
+        iterations: 50,
+        log: true,
+        logPeriod: 10
+      };
+    }
+    console.log('PARAM', exports.net[code]._trOption);
+    var trainResult = exports.net[code].train(labels.io, exports.net[code]._trOption);
+    exports.net[code]._trOption.errorThresh = Math.min(exports.net[code]._trOption.errorThresh, trainResult.error * 0.8);
+    exports.net[code]._trOption.iterations = Math.max(Math.min(trainResult.iterations * 2, 200), 50);
+    
+    stock.load(code, function( err, entry ) {
+      entry.expect = exports.expect(entry);
+      entry.save(function() {
+        console.log('EXPECTED', entry.title);
+        callback();
       });
     });
     console.log(new Date(), 'END TRAINING');
   } else {
     console.log('NO TRAIN DATA');
+    callback();
   }
 };
 
-var trainEntry = function( labels, item, next ) {
-  labels.codes.push(item.code);
+var trainEntry = function( item, next ) {
+  var labels = {
+    io: [],
+    code: item.code,
+  };
   console.log(item.code, item.title);
   if ( item.dailyData !== undefined ) {
     var set = [];
@@ -348,40 +346,37 @@ var trainEntry = function( labels, item, next ) {
           var i = input(set);
           var o = label(last, item.dailyData.slice(index + 1,
               index + 11));
-          labels.x.push(i);
-          labels.y.push(o);
+          labels.io.push({input: i, output: o});
           set.shift();
         }
         step();
       }, function() {
-        next(false, labels);
+        trainAndExpect(labels, next);
       });
   } else {
-    next(false, labels);
+    next();
   }
 };
 
 module.exports = exports = {
-  net : undefined,
+  net : {},
   train : function() {
     stock.getAll(function( err, stocks ) {
       console.log('TRAIN SET CREATION');
-      async.reduce(stocks, {
-        x: [],
-        y: [],
-        codes: [],
-      }, trainEntry, trainAndExpect);
+      async.each(stocks, trainEntry, trader.trade);
     });
   },
   expect : function( entry ) {
     var data = entry.dailyData.slice(-DAYS);
+    var code = entry.code;
     var expect = [];
     
     if ( data.length === DAYS ){
-      if ( typeof exports.net !== 'undefined' ) {
-        expect = exports.net.predict([
-          input(data)
-        ])[0];
+      if ( typeof exports.net[code] !== 'undefined' ) {
+        expect = exports.net[code].run(input(data));
+        for(var i=0; i < expect.length; i++){
+          expect[i] = expect[i] * 2 - 1;
+        }
       }
     }
 
